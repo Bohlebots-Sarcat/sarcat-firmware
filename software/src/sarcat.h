@@ -65,7 +65,7 @@ int head;
 
 int ball_richtung = 0;
 int ball_max = 0;
-boolean hat_ball = false;
+bool hat_ball = false;
 int ball_schwelle = 500;
 
 int torRichtung = 0;
@@ -73,11 +73,11 @@ int torEntfernung = 0;
 bool seheTor = false;
 
 int bot_type = 0;
-boolean hatKompass = false;
-boolean hatPixy = false;
+bool hatKompass = false;
+bool hatPixy = false;
 
 bool portena[] = {false, false, false, false, false, false, false, false};
-int tastLedID[] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
+int buttonLedAddresses[] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
 bool taster1Array[] = {false, false, false, false, false, false, false, false};
 bool taster2Array[] = {false, false, false, false, false, false, false, false};
 
@@ -139,7 +139,7 @@ public:
     totzeit = 1000;
     for (int lauf = 0; lauf < 8; lauf++)
     {
-      Wire.beginTransmission(tastLedID[lauf]);
+      Wire.beginTransmission(buttonLedAddresses[lauf]);
       byte error = Wire.endTransmission();
       if (error == 0)
         portena[lauf] = true;
@@ -183,6 +183,8 @@ public:
     statusblink(AUS);
     digitalWrite(DRIVE_DIS, LOW);
   }
+
+  // Reads out sensor data every 10 milliseconds, and exits after "wartezeit"
   void warte(int zeit)
   {
     wartezeit = 0;
@@ -235,6 +237,12 @@ public:
       fahre4(richtung, geschw, dreh);
   }
 
+  // spins all motors at the same time
+  void spin(int speed)
+  {
+    fahre(0, 0, speed);
+  }
+
   void set_type(int t)
   {
     if (t < 4)
@@ -248,12 +256,12 @@ public:
     ball_schwelle = s;
   }
 
-  void set_pixy(boolean t)
+  void set_pixy(bool t)
   {
     hatPixy = t;
   }
 
-  void set_Kompass(boolean t)
+  void set_Kompass(bool t)
   {
     hatKompass = t;
   }
@@ -445,12 +453,12 @@ private:
       if (portena[lauf])
       {
         int ledwert = 255 - led1Array[lauf] - led2Array[lauf];
-        Wire.beginTransmission(tastLedID[lauf]);
+        Wire.beginTransmission(buttonLedAddresses[lauf]);
         Wire.write(ledwert);
         ;
         Wire.endTransmission();
 
-        Wire.requestFrom(tastLedID[lauf], 1);
+        Wire.requestFrom(buttonLedAddresses[lauf], 1);
         if (Wire.available())
         {
           int tread = 255 - Wire.read();
