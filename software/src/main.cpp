@@ -55,7 +55,7 @@ void cornerBehavior()
   }
 }
 
-void normalGame(int ballRichtung, int torrichtung, bool hat_ball, bool seheTor)
+void normalGame(int ballRichtung, int torRichtung, bool hat_ball, bool seheTor)
 {
   bot.fahre(ballRichtung, 50, 3);
   if (hat_ball && seheTor)
@@ -66,7 +66,7 @@ void normalGame(int ballRichtung, int torrichtung, bool hat_ball, bool seheTor)
   {
     bot.fahre(ballRichtung, 50, 2);
   }
-  else if (!(hat_ball && seheTor))
+  else if (!hat_ball && seheTor)
   {
     bot.fahre(ballRichtung, 50, 2);
   }
