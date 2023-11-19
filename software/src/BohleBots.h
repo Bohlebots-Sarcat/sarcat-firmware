@@ -310,6 +310,16 @@ class BohleBots {
     void fahre(int richtung, int tempo, int drehung);
     /************************************************************
     *
+    *   BohleBots::ballFahre()
+    *
+    *   Beschreibung:
+    *      Wandelt die ball Richtung aus der Funktion ballRichtung()
+    *      in die Richtung die für die Funktion fahre() benötigt wird
+    *
+    ************************************************************/
+    int ballFahre();
+    /************************************************************
+    *
     *   BohleBots::siehtBall()
     *   
     *   Beschreibung:

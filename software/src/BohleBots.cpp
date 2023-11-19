@@ -367,7 +367,6 @@ void BohleBots::fahre3(int richtung, int tempo, int drehung) {
 }
 
 
-
 void BohleBots::fahre4(int richtung, int tempo, int drehung) {
   int maxs = abs(tempo) + abs(drehung);
   if (maxs > 100) {
@@ -423,6 +422,31 @@ void BohleBots::fahre4(int richtung, int tempo, int drehung) {
     motor(3, drehung);
     motor(4, drehung);
   }
+}
+
+int BohleBots::ballFahre() {
+    int richtung = 0;
+    switch (ballRichtung()) {
+        case -7: richtung = -2;
+        case -6: richtung = -2;
+        case -5: richtung = -2;
+        case -4: richtung = -2;
+        case -3: richtung = -1;
+        case -2: richtung = -1;
+        case -1: richtung = -1;
+        case 0: richtung = 0;
+        case 1: richtung = 1;
+        case 2: richtung = 1;
+        case 3: richtung = 1;
+        case 4: richtung = 2;
+        case 5: richtung = 2;
+        case 6: richtung = 2;
+        case 7: richtung = 2;
+        case 8: richtung = 3;
+        default: richtung = 0;
+            break;
+    }
+    return richtung;
 }
 
 

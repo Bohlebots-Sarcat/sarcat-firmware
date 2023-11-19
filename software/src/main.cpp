@@ -7,15 +7,15 @@ elapsedMillis ballTime;
 
 void setup()
 {
-  bot.set_type(3);
+  bot.setBotTyp(3);
   bot.init(); // Initiaize Bot!
   Serial.println("Bot started");
   ballTime = 0;
 }
 
 void loop() {
-    Serial.print(ball_richtung);
-    bot.fahre(ball_richtung, 20, 0);
+    Serial.println(String(bot.ballRichtung()) + "//" + String(bot.ballFahre()));
+    bot.fahre(bot.ballFahre(), 20, 0);
     bot.warte(100);
 }
 
