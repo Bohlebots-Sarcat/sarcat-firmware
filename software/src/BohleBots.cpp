@@ -427,28 +427,44 @@ void BohleBots::fahre4(int richtung, int tempo, int drehung) {
 int BohleBots::ballFahre() {
     int richtung = 0;
     switch (ballRichtung()) {
-        case -7: richtung = -2;
-        case -6: richtung = -2;
-        case -5: richtung = -2;
-        case -4: richtung = -2;
-        case -3: richtung = -1;
-        case -2: richtung = -1;
-        case -1: richtung = -1;
-        case 0: richtung = 0;
-        case 1: richtung = 1;
-        case 2: richtung = 1;
-        case 3: richtung = 1;
-        case 4: richtung = 2;
-        case 5: richtung = 2;
-        case 6: richtung = 2;
-        case 7: richtung = 2;
-        case 8: richtung = 3;
-        default: richtung = 0;
+        case -7:
+        case -6:
+            richtung = -3;
+            break;
+        case -5:
+        case -4:
+            richtung = -2;
+            break;
+        case -3:
+        case -2:
+            richtung = -1;
+            break;
+        case -1:
+        case 0:
+            richtung = 0;
+            break;
+        case 1:
+        case 2:
+            richtung = 1;
+            break;
+        case 3:
+        case 4:
+            richtung = 2;
+            break;
+        case 5:
+        case 6:
+            richtung = 3;
+            break;
+        case 7:
+        case 8:
+            richtung = 4;
+            break;
+        default:
+            richtung = 0;
             break;
     }
     return richtung;
 }
-
 
 
 void BohleBots::pixy_auswerten() { // wird nur aufgerufen, wenn die Pixy überhaupt etwas sieht

@@ -3,13 +3,13 @@
 //////////////////////////////////////////////////////////////////////
 /*
 *  BOHLEBOTS HEADER
-*  
+*
 *  Version: 0.1.16
 *  Date: 27th March 2023
 *
-*  Dieser Header ist eine Sammlung und Kapselung der 
+*  Dieser Header ist eine Sammlung und Kapselung der
 *  Standard-Funktionalitäten eines RoboCup-Soccer-Bots.
-*  Die hier verwendeten Funktionen und Variablen sind aufgearbeitete 
+*  Die hier verwendeten Funktionen und Variablen sind aufgearbeitete
 *  Erfahrungswerte, die die BohleBots der jahrelang im RoboCup Soccer
 *  sammeln konnten.
 *
@@ -27,7 +27,7 @@
 */
 //////////////////////////////////////////////////////////////////////
 //
-// Sollte hier ein Compiler-Fehler auftreten, muss die entsprechende 
+// Sollte hier ein Compiler-Fehler auftreten, muss die entsprechende
 // Bilbliothek installiert werden.
 //
 #include <Arduino.h>
@@ -51,9 +51,9 @@
 #define IR_ADRESSE      0x55
 #define KOMPASS_ADRESSE 0x60
 #define ANGLE_8            1
-// 
+//
 // Motor PORTS
-// 
+//
 #define DRIVE_DIS   2
 #define DRIVE1_PWM 12
 #define DRIVE1_DIR 13
@@ -63,9 +63,9 @@
 #define DRIVE3_DIR 25
 #define DRIVE4_PWM 19
 #define DRIVE4_DIR 18
-// 
+//
 // Analog PINs
-// 
+//
 #define INPUT1 35
 #define INPUT2 34
 #define INPUT3 39
@@ -99,7 +99,7 @@ enum FARBE {
 class BohleBots {
   public:
     /************************************************************
-    * Alles ab hier ist public 
+    * Alles ab hier ist public
     * also von ausserhalb dieser Klasse erreichbar
     ************************************************************/
     //
@@ -107,15 +107,15 @@ class BohleBots {
     //
     // Idee: Kurz Schub aufzunehmen, bevor gekickt wird
     elapsedMillis strikeZeit;
-    // Idee: Tracken wie lange das Tor nicht gesehen wurde 
+    // Idee: Tracken wie lange das Tor nicht gesehen wurde
     //       und parallel immer die letzte torRichtung speichern
-    elapsedMillis blindZeit;  
-    // Idee: Cool-Down-Timer fuer die Taster-Auslesung, 
+    elapsedMillis blindZeit;
+    // Idee: Cool-Down-Timer fuer die Taster-Auslesung,
     //       da loop viel schneller als menschlisches Druecken
-    elapsedMillis  tastZeit;  
+    elapsedMillis  tastZeit;
     //
     // Jeder Roboter besitzt auf dem InfraRot-Ring 2 steckbare Module
-    // Diese muessen durch festes verloeten eine Adresse bekommen, 
+    // Diese muessen durch festes verloeten eine Adresse bekommen,
     // welche in diese beiden Werte gesetzt werden muessen
     //
     int linkesModul  = 0;
@@ -127,71 +127,71 @@ class BohleBots {
     //////////////////////////////////////
     //
     // Diese Funktionen sollten bei Verwendung
-    // dieses Headers einmalig am Anfang des Programmes in einer 
+    // dieses Headers einmalig am Anfang des Programmes in einer
     // bestimmten Reihenfolge aufgerufen werden!
     //
     /************************************************************
     *
     * [1. Aufruf]
     *   BohleBots()
-    *   
+    *
     *   Beschreibung:
-    *     der Konstruktor erzeugt ein neues Objekt 
+    *     der Konstruktor erzeugt ein neues Objekt
     *     (bzw. eine neue Instanz) der BohleBots Klasse
     *
-    ************************************************************/    
+    ************************************************************/
     BohleBots();
     /************************************************************
     *
     * [2. - 5. Aufruf]
     *   BohleBots::setBotTyp(int)
-    *   
+    *
     *   Beschreibung:
     *     setzt die Anzahl der anzutreibenen Raeder
     *
     *   Parameter:
-    *     anzahlRaeder: Anzahl der Raeder die angetrieben 
+    *     anzahlRaeder: Anzahl der Raeder die angetrieben
     *                   werden muessen um zu fahren
     *
     *   Achtung:
     *     Dieser Header akzeptiert nur 2, 3 oder 4 Raeder!
-    *     anzahlRaeder < 2 => intern: anzahlRaeder = 2 
+    *     anzahlRaeder < 2 => intern: anzahlRaeder = 2
     *     anzahlRaeder > 4 => intern: anzahlRaeder = 4
     *
-    ************************************************************/  
+    ************************************************************/
     void setBotTyp(int anzahlRaeder);
     /************************************************************
     *
     * [2. - 5. Aufruf]
     *   BohleBots::setLichtPin(int)
-    *   
+    *
     *   Beschreibung:
-    *     setzt an welcher der 4 analogen Inputs die Lichtschranke 
+    *     setzt an welcher der 4 analogen Inputs die Lichtschranke
     *     angeschlossen ist
     *
     *   Parameter:
-    *     nummer: 1 => INPUT1, 
-    *             2 => INPUT2, 
-    *             3 => INPUT3, 
+    *     nummer: 1 => INPUT1,
+    *             2 => INPUT2,
+    *             3 => INPUT3,
     *             4 => INPUT4
     *
     *   Achtung:
-    *     nummer < 1 oder nummer > 4 
+    *     nummer < 1 oder nummer > 4
     *       => hatBall() gibt immer false zurueck
     *
-    ************************************************************/  
+    ************************************************************/
     void setLichtPin(int nummer);
     /************************************************************
     *
     * [2. - 5. Aufruf]
     *   BohleBots::setBallSchwelle(unsigned int)
-    *   
+    *
     *   Beschreibung:
-    *     setzt die Schwelle des analogen Wertes 
+    *     setzt die Schwelle des analogen Wertes
     *     fuer die Lichtschranke
     *
     *   Parameter:
-    *     schwelle: Analogwert der als Schwelle 
+    *     schwelle: Analogwert der als Schwelle
     *               gesetzt werden soll
     *
     *   Achtung:
@@ -204,7 +204,7 @@ class BohleBots {
     *
     * [2. - 5. Aufruf]
     *   BohleBots::setBenutztPixy(bool)
-    *   
+    *
     *   Beschreibung:
     *     setzt ob eine Pixy2 verwendet wird oder nicht
     *
@@ -213,7 +213,7 @@ class BohleBots {
     *              false / 0 wenn nicht
     *
     *   Achtung:
-    *     Falls falsch gesetzt haengt sich der I2C Bus auf 
+    *     Falls falsch gesetzt haengt sich der I2C Bus auf
     *     und der Roboter tut nichts!
     *
     ************************************************************/
@@ -222,9 +222,9 @@ class BohleBots {
     *
     * [2. - 5. Aufruf]
     *   BohleBots::setBenutztKompass(bool)
-    *   
+    *
     *   Beschreibung:
-    *     setzt ob eine Kompasssensor (CMPS11, CMPS12 oder CMPS14) 
+    *     setzt ob eine Kompasssensor (CMPS11, CMPS12 oder CMPS14)
     *     verwendet wird oder nicht
     *
     *   Parameter:
@@ -232,7 +232,7 @@ class BohleBots {
     *              false / 0 wenn nicht
     *
     *   Achtung:
-    *     Falls falsch gesetzt haengt sich der I2C Bus auf 
+    *     Falls falsch gesetzt haengt sich der I2C Bus auf
     *     und der Roboter tut nichts!
     *
     ************************************************************/
@@ -241,13 +241,13 @@ class BohleBots {
     *
     * [6. Aufruf]
     *   BohleBots::init()
-    *   
+    *
     *   Beschreibung:
-    *     initialisiert des Roboter-Objekt, 
+    *     initialisiert des Roboter-Objekt,
     *     bereitet also alle PINs, PORTs, und Verbindungen vor
     *
-    ************************************************************/ 
-    void init();    
+    ************************************************************/
+    void init();
     //////////////////////////////////////
     /*
     *   LOOP-FUNKTIONEN
@@ -260,12 +260,12 @@ class BohleBots {
     *
     * [!MUST HAVE IN JEDEM LOOP-DURCHLAUF!]
     *   BohleBots::warte(int)
-    *   
+    *
     *   Beschreibung:
     *     laesst den Roboter eine gewisse Zeit warten
     *
     *    Paramter:
-    *     zeit: Anzahl der Millisekunden, 
+    *     zeit: Anzahl der Millisekunden,
     *           die der Roboter warten soll
     *
     *     Achtung:
@@ -273,22 +273,22 @@ class BohleBots {
     *       nicht den gesamten Roboter lahm!
     *       Alle 10 ms werden die aktuellen Sensordaten gelesen!
     *
-    ************************************************************/ 
+    ************************************************************/
     void warte(int zeit);
     /************************************************************
     *
     *   BohleBots::fahre(int, int, int)
-    *   
+    *
     *   Beschreibung:
     *     laesst den Roboter in eine bestimmte Richtung,
-    *     mit einem bestimmten Tempo fahren und sich dabei 
+    *     mit einem bestimmten Tempo fahren und sich dabei
     *     gleichzeitig um die eigene Achse drehen
     *
     *    Paramter:
     *     richtung: Richtung in die gefahren werden soll
     *       BotTyp:       3         |       4
     *       ------------------------+-----------------
-    *          -3 :  xxxxxxxxxxx    |  135° links
+    *          -3 :  xxxxxxxxxxx    |  13x5° links
     *          -2 :   120° links    |   90° links
     *          -1 :    60° links    |   45° links
     *           0 :    0° / vorne   |    0° / vorne
@@ -301,12 +301,12 @@ class BohleBots {
     *
     *     Achtung:
     *       tempo + drehung kleiner als 100 halten!
-    *       Wenn richtung einen Wert besitzt der nicht 
-    *       in der Tabelle steht, wird kein neuer Befehl 
+    *       Wenn richtung einen Wert besitzt der nicht
+    *       in der Tabelle steht, wird kein neuer Befehl
     *       an die Motoren gesendet!
     *       Eine Implementierung mit BotTyp 2 existiert nicht!
     *
-    ************************************************************/ 
+    ************************************************************/
     void fahre(int richtung, int tempo, int drehung);
     /************************************************************
     *
@@ -321,16 +321,16 @@ class BohleBots {
     /************************************************************
     *
     *   BohleBots::siehtBall()
-    *   
+    *
     *   Beschreibung:
-    *      gibt zurueck ob der InfraRot-Ring den Ball sieht 
+    *      gibt zurueck ob der InfraRot-Ring den Ball sieht
     *
     ************************************************************/
     bool siehtBall();
     /************************************************************
     *
     *   BohleBots::ballRichtung()
-    *   
+    *
     *   Beschreibung:
     *      gibt die BallRichtung vom InfraRot-Ring zurueck
     *      hierbei gilt:
@@ -352,7 +352,7 @@ class BohleBots {
     *        8 => 180° / hinten
     *
     *     Achtung:
-    *       Wenn kein Ball gesehen wird, 
+    *       Wenn kein Ball gesehen wird,
     *       ist der Rueckgabewert -7!
     *
     ************************************************************/
@@ -360,10 +360,10 @@ class BohleBots {
     /************************************************************
     *
     *   BohleBots::hatBall()
-    *   
+    *
     *   Beschreibung:
     *      gibt zurueck ob der Ball in der Lichtschranke ist,
-    *      indem der Analogwert der Lichtschranke mit der 
+    *      indem der Analogwert der Lichtschranke mit der
     *      BallSchwelle verglichen wird
     *
     ************************************************************/
@@ -371,40 +371,40 @@ class BohleBots {
     /************************************************************
     *
     *   BohleBots::kompassRichtung()
-    *   
+    *
     *   Beschreibung:
     *     gibt die Richtung des Kompasssensors
     *     von -180° bis +180° zurueck
-    * 
+    *
     *     Achtung:
-    *       Wenn kein Kompass benutzt wird, 
+    *       Wenn kein Kompass benutzt wird,
     *       ist der Ruckgabewert 0;
     *
-    ************************************************************/ 
+    ************************************************************/
     int kompassRichtung();
     /************************************************************
     *
     *   BohleBots::setKompassHeading()
-    *   
+    *
     *   Beschreibung:
-    *     setzt die Richtung von 0° / vorne 
+    *     setzt die Richtung von 0° / vorne
     *     auf die aktuelle Richtung
-    * 
+    *
     *     Achtung:
-    *       Wenn kein Kompass benutzt wird, 
+    *       Wenn kein Kompass benutzt wird,
     *       tut diese Funktion nichts!
     *
-    ************************************************************/ 
+    ************************************************************/
     void setKompassHeading();
     /************************************************************
     *
     *   BohleBots::siehtTor()
-    *   
+    *
     *   Beschreibung:
     *      gibt zurueck ob die Pixy gerade etwas als Tor erkennt
-    * 
+    *
     *     Achtung:
-    *       Wenn keine Pixy benutzt wird, 
+    *       Wenn keine Pixy benutzt wird,
     *       ist der Rueckgabewert false;
     *
     ************************************************************/
@@ -412,12 +412,12 @@ class BohleBots {
     /************************************************************
     *
     *   BohleBots::torRichtung()
-    *   
+    *
     *   Beschreibung:
     *      gibt die Richtung des Tores per Pixy in Pixeln zurueck
-    *      hierbei wird die Mitte der erkannten Signatur genommen 
+    *      hierbei wird die Mitte der erkannten Signatur genommen
     *      und der x-Wert minus die halbe Bildbreite gerechnet
-    * 
+    *
     *     Achtung:
     *       Wenn keine weder Kompass noch Pixy benutzt werden,
     *       ist der Rueckgabewert 0!
@@ -429,15 +429,15 @@ class BohleBots {
     /************************************************************
     *
     *   BohleBots::torEntfernung()
-    *   
+    *
     *   Beschreibung:
     *      gibt die Entfernung des Tores per Pixy zurueck
-    *      hierbei wird von der Oberkannte des Tores die Hoehe 
+    *      hierbei wird von der Oberkannte des Tores die Hoehe
     *      abgezogen und das Ergebnis durch 4 geteilt
-    * 
+    *
     *     Achtung:
     *       Diese Funktion ist ein Relikt von aus dem Jahr 2017
-    *       Team Bohlebots Quadro, daher keine Garantie auf 
+    *       Team Bohlebots Quadro, daher keine Garantie auf
     *       universelle Sinnhaftigkeit!
     *
     ************************************************************/
@@ -445,9 +445,9 @@ class BohleBots {
     /************************************************************
     *
     *   BohleBots::input(int)
-    *   
+    *
     *   Beschreibung:
-    *     gibt den Analogwert des PINs an 
+    *     gibt den Analogwert des PINs an
     *     INPUT1, INPUT2, INPUT3 oder INPUT4 zurueck
     *
     *    Paramter:
@@ -458,36 +458,36 @@ class BohleBots {
     *
     *     Achtung:
     *       Wenn nummer nicht 1, 2, 3 oder 4 ist,
-    *       ist der Rueckgabewert 0!    
+    *       ist der Rueckgabewert 0!
     *
-    ************************************************************/ 
+    ************************************************************/
     int input(int nummer);
     /************************************************************
     *
     *   BohleBots::taster(int,int)
-    *   
+    *
     *   Beschreibung:
-    *      gibt zurueck ob der Taster von einem bestimmten Device 
+    *      gibt zurueck ob der Taster von einem bestimmten Device
     *      mit Nummber 1 oder 2 gedrueckt ist
     *
     *    Paramter:
     *     device: Adresse die auf den Taster-Modulen als
     *             Binaerzahl eingeloetet wurde
     *     nummer: 1 => links oder 2 => rechts
-    *     
+    *
     *     Achtung:
-    *       Wenn device < 0, device > 7 ist, 
-    *       oder nummer weder 1 noch 2 ist, 
+    *       Wenn device < 0, device > 7 ist,
+    *       oder nummer weder 1 noch 2 ist,
     *       ist der Rueckgabewert false!
-    *  
+    *
     ************************************************************/
     bool taster(int device, int nummer);
     /************************************************************
     *
     *   BohleBots::setLed(int,int,FARBE)
-    *   
+    *
     *   Beschreibung:
-    *      setzt eine LED auf einem Device und einer nummer 
+    *      setzt eine LED auf einem Device und einer nummer
     *      auf eine bestimmte Farbee
     *
     *    Paramter:
@@ -496,35 +496,35 @@ class BohleBots {
     *     nummer: 1 => links oder 2 => rechts
     *     farbe:  AUS, GRUEN, ROT, GELB, BLAU, CYAN,
     *             MAGENTA oder WEISS
-    *     
+    *
     *     Achtung:
-    *       Wenn device < 0, device > 7 ist, 
-    *       oder nummer weder 1 noch 2 ist, 
+    *       Wenn device < 0, device > 7 ist,
+    *       oder nummer weder 1 noch 2 ist,
     *       passiert nichts!
-    *       Die LED behaelt solange ihre Farbe, 
+    *       Die LED behaelt solange ihre Farbe,
     *       bis diese ueberschrieben oder auf AUS gesetzt wird!
-    *  
+    *
     ************************************************************/
     void setLed(int device, int nummer, FARBE farbe);
     /************************************************************
     *
     *   BohleBots::kick(int)
-    *   
+    *
     *   Beschreibung:
     *      setzt den Kicker PORT fuer eine bestimmte Zeit HIGH,
     *      sodass der Roboter kickt
     *
     *    Paramter:
-    *     zeit: Anzahl der Millisekunden, die der PORT HIGH 
+    *     zeit: Anzahl der Millisekunden, die der PORT HIGH
     *           gesetzt wird
-    *     
+    *
     *     Achtung:
-    *       Je hoeher zeit, desto haerter der Kick, 
+    *       Je hoeher zeit, desto haerter der Kick,
     *       aber um brennende Roboter zu verhindern,
     *       wird der Kick auf maximal 40 Millisekunden begrenzt!
     *       Diese Funktion beinhaltet das einzige delay,
     *       dass im gesamten Programm verwendet werden sollte!
-    *  
+    *
     ************************************************************/
     void kick(int zeit);
   //////////////////////////////////////////////////////////////////////////////
@@ -564,7 +564,7 @@ class BohleBots {
     bool _siehtTor      = false;
     int  _torRichtung   = 0;
     int  _torEntfernung = 0;
-    // Zeiten  
+    // Zeiten
     elapsedMillis totZeit;    // CoolDown-Timer, damit der Kicker nicht ueberhitzt
     elapsedMillis warteZeit;  // Timer fuer die warte()-Funktion
     //
@@ -573,13 +573,13 @@ class BohleBots {
     // I2C
     void i2csync();
     int  spdToPWM(int speed);
-    void statusblink(FARBE farbe);   
+    void statusblink(FARBE farbe);
     // Kompass
     int  kompass_org();
     int  kompass_lesen();
     // Pixy
     void pixy_auswerten();
-    void pixy_read(); 
+    void pixy_read();
     // Motoren
     void motor(int number, int speed);
     void fahre3(int richtung, int tempo, int drehung);

@@ -1,99 +1,65 @@
 #include "BohleBots.h"
 
 BohleBots bot;
+elapsedMillis printState;
 
-// Timer that resets when ball is captured
-elapsedMillis ballTime;
+const int testSpeed = 25;
+const int normalSpeed = 40;
+const int strikeSpeed = 70;
+
+const int idleModus = 0;
+const int playModus = 1;
+
+int currentModus = idleModus;
+
+void changeModus();
+void executeIdleness();
+void printIdleness();
+void play();
 
 void setup()
 {
-  bot.setBotTyp(3);
-  bot.init(); // Initiaize Bot!
-  Serial.println("Bot started");
-  ballTime = 0;
+    bot.setBotTyp(4);
+    bot.init();
+    bot.setBenutztPixy(true);
+    bot.setBenutztKompass(false);
+    Serial.println("Bot started");
 }
 
 void loop() {
-    Serial.println(String(bot.ballRichtung()) + "//" + String(bot.ballFahre()));
-    bot.fahre(bot.ballFahre(), 20, 0);
-    bot.warte(100);
-}
-
-/*
- * // Spiellogik sarcat
-#include "sarcat.h"
-
-BohleBots bot;
-
-// Timer that resets when ball is captured
-elapsedMillis ballTime;
-
-void strafeRight();
-void strafeLeft();
-void normalGame(int, int, bool, bool);
-void cornerBehavior();
-void cornerExit();
-
-void setup()
-{
-  bot.set_type(3);
-  Serial.print("Bot started");
-  ballTime = 0;
-}
-
-void loop()
-{
-normalGame(bot.ballrichtung(), bot.torrichtung(), hat_ball, seheTor);
-cornerBehavior();
-bot.warte(10);
-}
-
-void strafeRight()
-{
-    bot.fahre(1, 65, 0);
-    bot.warte(1800);
-    normalGame(bot.ballrichtung(), bot.torrichtung(), hat_ball, seheTor);
-}
-
-void strafeLeft()
-{
-    bot.fahre(-1, 65, 0);
-    bot.warte(1800);
-    normalGame(bot.ballrichtung(), bot.torrichtung(), hat_ball, seheTor);
-}
-
-void cornerExit()
-{
-    bot.spin(69);
-}
-
-// Checks if bot is likely to be stuck in a corner
-void cornerBehavior()
-{
-    if (ballTime > 1150 && !seheTor)
-    {
-        cornerExit();
+    if (bot.taster(1, 2)) changeModus();
+    switch(currentModus) {
+        case idleModus:
+            executeIdleness();
+            break;
+        case playModus:
+            play();
+            break;
     }
+    bot.warte(20);
 }
 
-void normalGame(int ballRichtung, int torRichtung, bool hat_ball, bool seheTor)
-{
-    bot.fahre(ballRichtung, 50, 3);
-    if (hat_ball && seheTor)
-    {
-        bot.fahre(torRichtung, 69, 2);
-    }
-    else if (hat_ball && !seheTor)
-    {
-        bot.fahre(ballRichtung, 50, 2);
-    }
-    else if (!hat_ball && seheTor)
-    {
-        bot.fahre(ballRichtung, 50, 2);
-    }
-    else
-    {
-        bot.fahre(ballRichtung, 50, 1);
-    }
+void executeIdleness() {
+    if (bot.taster(1, 2)) changeModus();
+    Serial.println("Bot Currently Idle " + String("Ball: ") + String(bot.ballRichtung()) + String(" ") + "Tor: " + String(bot.torRichtung()) + String(" ") + String("trueBall: " + String(bot.ballFahre())));
 }
- */
+
+void play() {
+    bot.fahre(bot.ballFahre(), testSpeed, bot.torRichtung() / 2);
+    if (bot.taster(1, 2)) changeModus();
+}
+
+void changeModus() {
+    switch (currentModus) {
+        case idleModus:
+            currentModus = playModus;
+            break;
+        case playModus:
+            currentModus = idleModus;
+            break;
+        default:
+            currentModus = idleModus;
+            break;
+    }
+    Serial.println(currentModus);
+}
