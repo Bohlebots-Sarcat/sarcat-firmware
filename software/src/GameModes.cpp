@@ -8,8 +8,9 @@
 BohleBots sarcat;
 
 void GameModes::normal() {
-    sarcat.fahre(sarcat.ballFahre(3, false), normalSpeed, 0);
+    sarcat.setLed();
+    sarcat.fahre(sarcat.ballFahre(3, false), sarcat.normalSpeed, 0);
 }
 void GameModes::debug() {
-    sarcat.fahre(sarcat.ballFahre(3, true), normalSpeed, 0);
+    sarcat.fahre(sarcat.ballFahre(3, true), sarcat.testSpeed, 0);
 }

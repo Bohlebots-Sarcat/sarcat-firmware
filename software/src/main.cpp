@@ -5,11 +5,7 @@ GameModes mode;
 BohleBots bot;
 
 namespace sarcat {
-
     int modus = 0;
-
-    const std::string secondaryLED = "ROT";
-    const std::string primaryLED = "GRÜN";
 
     void test();
     void switchMode(int modul, int taster, bool print);

@@ -102,6 +102,16 @@ class BohleBots {
     * Alles ab hier ist public
     * also von ausserhalb dieser Klasse erreichbar
     ************************************************************/
+
+    // Sarcat:
+
+    const std::string secondaryLED = "ROT";
+    const std::string primaryLED = "GRÜN";
+
+    const int normalSpeed = 45;
+    const int StrikeSpeed = 60;
+    const int testSpeed = 25;
+
     //
     // elapsedMillis zur FREIEN VERWENDUNG!
     //
