@@ -118,8 +118,8 @@ class BohleBots {
     // Diese muessen durch festes verloeten eine Adresse bekommen,
     // welche in diese beiden Werte gesetzt werden muessen
     //
-    int linkesModul  = 0;
-    int rechtesModul = 0;
+    int linkesModul  = 1;
+    int rechtesModul = 2;
     //////////////////////////////////////
     /*
     *   SETUP-FUNKTIONEN
@@ -144,7 +144,7 @@ class BohleBots {
     /************************************************************
     *
     * [2. - 5. Aufruf]
-    *   BohleBots::setBotTyp(int)
+    *   BohleBots::setType(int)
     *
     *   Beschreibung:
     *     setzt die Anzahl der anzutreibenen Raeder
@@ -159,7 +159,7 @@ class BohleBots {
     *     anzahlRaeder > 4 => intern: anzahlRaeder = 4
     *
     ************************************************************/
-    void setBotTyp(int anzahlRaeder);
+    void setType(int anzahlRaeder);
     /************************************************************
     *
     * [2. - 5. Aufruf]
@@ -203,7 +203,7 @@ class BohleBots {
     /************************************************************
     *
     * [2. - 5. Aufruf]
-    *   BohleBots::setBenutztPixy(bool)
+    *   BohleBots::usePixy(bool)
     *
     *   Beschreibung:
     *     setzt ob eine Pixy2 verwendet wird oder nicht
@@ -217,7 +217,7 @@ class BohleBots {
     *     und der Roboter tut nichts!
     *
     ************************************************************/
-    void setBenutztPixy(bool benutzt);
+    void usePixy(bool benutzt);
     /************************************************************
     *
     * [2. - 5. Aufruf]
@@ -288,7 +288,7 @@ class BohleBots {
     *     richtung: Richtung in die gefahren werden soll
     *       BotTyp:       3         |       4
     *       ------------------------+-----------------
-    *          -3 :  xxxxxxxxxxx    |  13x5° links
+    *          -3 :  xxxxxxxxxxx    |  135° links
     *          -2 :   120° links    |   90° links
     *          -1 :    60° links    |   45° links
     *           0 :    0° / vorne   |    0° / vorne
@@ -317,7 +317,27 @@ class BohleBots {
     *      in die Richtung die für die Funktion fahre() benötigt wird
     *
     ************************************************************/
-    int ballFahre();
+    int ballFahre(int type, bool ERROR);
+    /************************************************************
+    *
+    *   BohleBots::ballFahre()
+    *
+    *   Beschreibung:
+    *      Wandelt die ball Richtung aus der Funktion ballRichtung()
+    *      in die Richtung die für die Funktion fahre() benötigt wird
+    *
+    ************************************************************/
+    int ballFahre_3();
+    /************************************************************
+    *
+    *   BohleBots::ballFahre()
+    *
+    *   Beschreibung:
+    *      Wandelt die ball Richtung aus der Funktion ballRichtung()
+    *      in die Richtung die für die Funktion fahre() benötigt wird
+    *
+    ************************************************************/
+    int ballFahre_4();
     /************************************************************
     *
     *   BohleBots::siehtBall()

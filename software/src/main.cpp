@@ -1,65 +1,67 @@
 #include "BohleBots.h"
+#include "GameModes.h"
 
+GameModes mode;
 BohleBots bot;
-elapsedMillis printState;
 
-const int testSpeed = 25;
-const int normalSpeed = 40;
-const int strikeSpeed = 70;
+namespace sarcat {
 
-const int idleModus = 0;
-const int playModus = 1;
+    int modus = 0;
 
-int currentModus = idleModus;
+    const std::string secondaryLED = "ROT";
+    const std::string primaryLED = "GRÜN";
 
-void changeModus();
-void executeIdleness();
-void printIdleness();
-void play();
-
-void setup()
-{
-    bot.setBotTyp(4);
-    bot.init();
-    bot.setBenutztPixy(true);
-    bot.setBenutztKompass(false);
-    Serial.println("Bot started");
+    void test();
+    void switchMode(int modul, int taster, bool print);
+    void executeMode();
 }
+
+void sarcat::switchMode(int modul, int taster, bool print) {
+    if (print) Serial.printf("Button Pressed");
+    if (modul == 1) {
+        switch (sarcat::modus) {
+            case 1:
+                sarcat::modus = 0;
+            case 2:
+            case 3:
+            case 4:
+                sarcat::modus = 1;
+        }
+    } else if (modul == 2) {
+        switch (sarcat::modus) {
+            case 2:
+                sarcat::modus = 0;
+            case 1:
+            case 3:
+            case 4:
+                sarcat::modus = 2;
+        }
+    }
+}
+
+void sarcat::executeMode() {
+    switch (sarcat::modus) {
+        case 1: mode.normal();
+        case 2: mode.debug();
+        default: break;
+    }
+}
+
+void setup() {
+    bot.init();
+    bot.setType(3);
+    bot.usePixy(true);
+}
+
 
 void loop() {
-    if (bot.taster(1, 2)) changeModus();
-    switch(currentModus) {
-        case idleModus:
-            executeIdleness();
-            break;
-        case playModus:
-            play();
-            break;
-    }
+    if (bot.taster(1, 1)) sarcat::switchMode(1, 1, true);
+    if (bot.taster(1, 2)) sarcat::switchMode(1, 2, true);
+    if (bot.taster(2, 1)) sarcat::switchMode(2, 1, true);
+    if (bot.taster(2, 2)) sarcat::switchMode(2, 1, true);
+
+    sarcat::executeMode();
+
+    Serial.printf("Current Modus: %d\n", sarcat::modus);
     bot.warte(20);
-}
-
-void executeIdleness() {
-    if (bot.taster(1, 2)) changeModus();
-    Serial.println("Bot Currently Idle " + String("Ball: ") + String(bot.ballRichtung()) + String(" ") + "Tor: " + String(bot.torRichtung()) + String(" ") + String("trueBall: " + String(bot.ballFahre())));
-}
-
-void play() {
-    bot.fahre(bot.ballFahre(), testSpeed, bot.torRichtung() / 2);
-    if (bot.taster(1, 2)) changeModus();
-}
-
-void changeModus() {
-    switch (currentModus) {
-        case idleModus:
-            currentModus = playModus;
-            break;
-        case playModus:
-            currentModus = idleModus;
-            break;
-        default:
-            currentModus = idleModus;
-            break;
-    }
-    Serial.println(currentModus);
 }
