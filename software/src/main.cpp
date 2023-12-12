@@ -29,14 +29,27 @@ void switchMode(int modul, int taster, bool print) {
 
 void executeMode() {
     switch (game.modus) {
-        case 0:
+        case 0: {
             game.LED();
-        case 1:
-            game.normal();
-        case 2:
-            game.debug();
-        default:
             break;
+        }
+        case 1: {
+            game.normal();
+            break;
+        }
+        case 2: {
+            game.kickOff();
+            break;
+        }
+        case 3: {
+            game.debug();
+            break;
+        }
+        case 4: {
+            game.mode4();
+            break;
+        }
+        default: break;
     }
 }
 
