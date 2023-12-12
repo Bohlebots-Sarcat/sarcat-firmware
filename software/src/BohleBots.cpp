@@ -192,7 +192,7 @@ bool BohleBots::siehtTor() {
 }
 
 
-void BohleBots::setLed(int device, int nr, FARBE farbe) {  // setzt device led nr (1:links, 2:rechts) auf farbe
+void BohleBots::setLed(int device, int nr, int farbe) {  // setzt device led nr (1:links, 2:rechts) auf farbe
     //if (farbe < 0) return;
     //if (farbe > 7) return;
     if (device < 0) return;

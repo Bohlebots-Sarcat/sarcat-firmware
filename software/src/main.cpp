@@ -1,49 +1,47 @@
-#include "BohleBots.h"
+#include "Bohlebots.h"
 #include "GameModes.h"
 
-GameModes mode;
+GameModes game;
 BohleBots bot;
 
-namespace sarcat {
-    int modus = 0;
+void switchMode(int modul, int taster, bool print);
 
-    void test();
-    void switchMode(int modul, int taster, bool print);
-    void executeMode();
-}
+void executeMode();
 
-void sarcat::switchMode(int modul, int taster, bool print) {
+void switchMode(int modul, int taster, bool print) {
     if (print) Serial.printf("Button Pressed");
     if (modul == 1) {
-        switch (sarcat::modus) {
+        switch (taster) {
             case 1:
-                sarcat::modus = 0;
+                game.modus = 1;
             case 2:
-            case 3:
-            case 4:
-                sarcat::modus = 1;
+                game.modus = 2;
         }
     } else if (modul == 2) {
-        switch (sarcat::modus) {
-            case 2:
-                sarcat::modus = 0;
+        switch (taster) {
             case 1:
-            case 3:
-            case 4:
-                sarcat::modus = 2;
+                game.modus = 3;
+            case 2:
+                game.modus = 4;
         }
     }
 }
 
-void sarcat::executeMode() {
-    switch (sarcat::modus) {
-        case 1: mode.normal();
-        case 2: mode.debug();
-        default: break;
+void executeMode() {
+    switch (game.modus) {
+        case 0:
+            game.LED();
+        case 1:
+            game.normal();
+        case 2:
+            game.debug();
+        default:
+            break;
     }
 }
 
 void setup() {
+    game.modus = 0;
     bot.init();
     bot.setType(3);
     bot.usePixy(true);
@@ -51,13 +49,13 @@ void setup() {
 
 
 void loop() {
-    if (bot.taster(1, 1)) sarcat::switchMode(1, 1, true);
-    if (bot.taster(1, 2)) sarcat::switchMode(1, 2, true);
-    if (bot.taster(2, 1)) sarcat::switchMode(2, 1, true);
-    if (bot.taster(2, 2)) sarcat::switchMode(2, 1, true);
+    if (bot.taster(1, 1)) switchMode(1, 1, true);
+    else if (bot.taster(1, 2)) switchMode(1, 2, true);
+    else if (bot.taster(2, 1)) switchMode(2, 1, true);
+    else if (bot.taster(2, 2)) switchMode(2, 1, true);
 
-    sarcat::executeMode();
+    executeMode();
 
-    Serial.printf("Current Modus: %d\n", sarcat::modus);
+    Serial.printf("Current Modus: %d\n", game.modus);
     bot.warte(20);
 }

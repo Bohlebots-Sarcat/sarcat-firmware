@@ -5,12 +5,19 @@
 #include "GameModes.h"
 #include "BohleBots.h"
 
-BohleBots sarcat;
+BohleBots bot;
+
+void GameModes::LED() {
+    bot.setLed(1, 1, 1);
+    bot.setLed(1, 1, 1);
+    bot.setLed(1, 1, 1);
+    bot.setLed(1, 1, 1);
+}
 
 void GameModes::normal() {
-    sarcat.setLed();
-    sarcat.fahre(sarcat.ballFahre(3, false), sarcat.normalSpeed, 0);
+    bot.setLed(1, 1, bot.primaryLED);
+    bot.fahre(bot.ballFahre(3, false), bot.normalSpeed, 0);
 }
 void GameModes::debug() {
-    sarcat.fahre(sarcat.ballFahre(3, true), sarcat.testSpeed, 0);
+    bot.fahre(bot.ballFahre(3, true), bot.testSpeed, 0);
 }

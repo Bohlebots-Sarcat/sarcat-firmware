@@ -105,8 +105,8 @@ class BohleBots {
 
     // Sarcat:
 
-    const std::string secondaryLED = "ROT";
-    const std::string primaryLED = "GRÜN";
+    const int secondaryLED = 1;
+    const int primaryLED = 2;
 
     const int normalSpeed = 45;
     const int StrikeSpeed = 60;
@@ -535,7 +535,7 @@ class BohleBots {
     *       bis diese ueberschrieben oder auf AUS gesetzt wird!
     *
     ************************************************************/
-    void setLed(int device, int nummer, FARBE farbe);
+    void setLed(int device, int nummer, int farbe);
     /************************************************************
     *
     *   BohleBots::kick(int)

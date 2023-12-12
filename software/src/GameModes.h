@@ -7,6 +7,8 @@
 
 class GameModes {
 public:
+    int modus;
+    void LED();
     void normal();
     void debug();
 };
