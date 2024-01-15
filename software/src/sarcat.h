@@ -182,55 +182,7 @@ public:
     }
 
     void fahre(int richtung, int tempo, int drehung) {
-        int maxs = abs(tempo) + abs(drehung);
-        if (maxs > 100) {
-            tempo = tempo * 100 / maxs;
-            drehung = drehung * 100 / maxs;
-        }
-        switch (richtung) {
-            case 0: // geradeaus
-                motor(1, -tempo + drehung);
-                motor(2, +drehung);
-                motor(3, tempo + drehung);
-                break;
-            case 1: // 60 Grad rechts
-                motor(1, -tempo + drehung);
-                motor(2, tempo + drehung);
-                motor(3, +drehung);
-                break;
-            case 2: // 120 Grad rechts
-            case 3:
-            case 4:
-                motor(1, +drehung);
-                motor(2, tempo + drehung);
-                motor(3, -tempo + drehung);
-                break;
-            case 5: // zurück
-            case 6:
-            case 7:
-            case -7:
-            case -6:
-            case -5:
-                motor(1, tempo + drehung);
-                motor(2, +drehung);
-                motor(3, -tempo + drehung);
-                break;
-            case -4: // -120 Grad links
-            case -3:
-            case -2:
-                motor(1, tempo + drehung);
-                motor(2, -tempo + drehung);
-                motor(3, +drehung);
-                break;
-            case -1: // -60 Grad links
-                motor(1, +drehung);
-                motor(2, -tempo + drehung);
-                motor(3, tempo + drehung);
-                break;
-            default:
-                // Handle the case when 'richtung' is not any of the specified values
-                break;
-        }
+        fahre3(richtung, tempo, drehung);
     }
 
     void set_bot_type(int t) {
@@ -354,6 +306,59 @@ public:
     }
 
 private:
+
+    void fahre3(int richtung, int tempo, int drehung) {
+        int maxs = abs(tempo) + abs(drehung);
+        if (maxs > 100) {
+            tempo = tempo * 100 / maxs;
+            drehung = drehung * 100 / maxs;
+        }
+        switch (richtung) {
+            case 0: // geradeaus
+                motor(1, -tempo + drehung);
+                motor(2, +drehung);
+                motor(3, tempo + drehung);
+                break;
+            case 1: // 60 Grad rechts
+                motor(1, -tempo + drehung);
+                motor(2, tempo + drehung);
+                motor(3, +drehung);
+                break;
+            case 2: // 120 Grad rechts
+            case 3:
+            case 4:
+                motor(1, +drehung);
+                motor(2, tempo + drehung);
+                motor(3, -tempo + drehung);
+                break;
+            case 5: // zurück
+            case 6:
+            case 7:
+            case -7:
+            case -6:
+            case -5:
+                motor(1, tempo + drehung);
+                motor(2, +drehung);
+                motor(3, -tempo + drehung);
+                break;
+            case -4: // -120 Grad links
+            case -3:
+            case -2:
+                motor(1, tempo + drehung);
+                motor(2, -tempo + drehung);
+                motor(3, +drehung);
+                break;
+            case -1: // -60 Grad links
+                motor(1, +drehung);
+                motor(2, -tempo + drehung);
+                motor(3, tempo + drehung);
+                break;
+            default:
+                // Handle the case when 'richtung' is not any of the specified values
+                break;
+        }
+    }
+
     int spdToPWM(int speed) {
         if (speed < 0)
             speed *= -1;

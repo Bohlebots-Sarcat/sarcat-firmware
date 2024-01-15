@@ -8,8 +8,6 @@ void write();
 
 void play();
 
-int ballDirection();
-
 void setup() {
     bot.init();
     bot.boardled(1, AUS);
@@ -33,7 +31,7 @@ void write() {
     Serial.println(bot.ballDistance);
     Serial.print("Ball ist da  : ");
     Serial.println(bot.ballExists);
-    Serial.println(ballDirection());
+    Serial.println(bot.ballDirection);
     Serial.println("");
 
     if (bot.ballExists) bot.boardled(1, GRUEN);
@@ -46,5 +44,5 @@ void write() {
 }
 
 void play() {
-    bot.fahre(ballDirection(), 30, 20);
+    bot.fahre(bot.ballDirection, 30, 20);
 }
