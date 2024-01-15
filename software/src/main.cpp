@@ -1,61 +1,50 @@
-#include "Bohlebots.h"
-#include "GameModes.h"
+#include "sarcat.h"
 
-GameModes game;
 BohleBots bot;
 
-void switchMode(int modul, int taster, bool print);
+bool modus = false;
 
-void executeMode();
+void write();
 
-void switchMode(int modul, int taster, bool print) {
-    if (print) Serial.printf("Button Pressed");
-    if (modul == 1) {
-        switch (taster) {
-            case 1:
-                game.modus = 1;
-            case 2:
-                game.modus = 2;
-        }
-    } else if (modul == 2) {
-        switch (taster) {
-            case 1:
-                game.modus = 3;
-            case 2:
-                game.modus = 4;
-        }
-    }
-}
+void play();
 
-void executeMode() {
-    switch (game.modus) {
-        case 0:
-            game.LED();
-        case 1:
-            game.normal();
-        case 2:
-            game.debug();
-        default:
-            break;
-    }
-}
+int ballDirection();
 
 void setup() {
-    game.modus = 0;
     bot.init();
-    bot.setType(3);
-    bot.usePixy(true);
+    bot.boardled(1, AUS);
+    bot.boardled(2, AUS);
 }
 
-
 void loop() {
-    if (bot.taster(1, 1)) switchMode(1, 1, true);
-    else if (bot.taster(1, 2)) switchMode(1, 2, true);
-    else if (bot.taster(2, 1)) switchMode(2, 1, true);
-    else if (bot.taster(2, 2)) switchMode(2, 1, true);
+    if (bot.boardtast(1)) modus = true;
+    if (modus) play();
 
-    executeMode();
+    bot.warte(5);
+    write();
+}
 
-    Serial.printf("Current Modus: %d\n", game.modus);
-    bot.warte(20);
+void write() {
+    bot.warte(1500);
+    Serial.println("Debug-Info");
+    Serial.print("Ballrichtung : ");
+    Serial.println(bot.ballDirection);
+    Serial.print("Ballzone     : ");
+    Serial.println(bot.ballDistance);
+    Serial.print("Ball ist da  : ");
+    Serial.println(bot.ballExists);
+    Serial.println(ballDirection());
+    Serial.println("");
+
+    if (bot.ballExists) bot.boardled(1, GRUEN);
+    else if (!bot.ballExists) bot.boardled(1, ROT);
+
+    if (bot.goalExists()) bot.boardled(2, GRUEN);
+    else if (!bot.goalExists()) bot.boardled(2, ROT);
+
+    bot.pixyStatus();
+}
+
+void play() {
+    bot.fahre(ballDirection(), 30, 20);
 }
