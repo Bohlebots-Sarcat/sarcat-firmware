@@ -1,11 +1,10 @@
 //
 // Created by Jan Schlegel on 19.01.24.
 //
-#include "sarcat.h"
+#include "BohleBots.h"
 #ifndef SOFTWARE_GAMEMODES_H
 #define SOFTWARE_GAMEMODES_H
 
-BohleBots bot;
 
 class GameModes {
 public:

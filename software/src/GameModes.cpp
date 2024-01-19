@@ -4,10 +4,12 @@
 
 #include "GameModes.h"
 
+BohleBots bot;
+
 void GameModes::init() {
     bot.init();
-    bot.boardled(1, AUS);
-    bot.boardled(2, AUS);
+    bot.boardLED(1, AUS);
+    bot.boardLED(2, AUS);
 }
 
 void GameModes::wait() {
@@ -15,7 +17,7 @@ void GameModes::wait() {
 }
 
 void GameModes::play() {
-    bot.fahre(bot.ballDirection, 30, bot.currentRotation());
+    bot.fahre(bot.ballRichtung(), 30, 0);
 }
 
 

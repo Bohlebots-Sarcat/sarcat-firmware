@@ -7,7 +7,8 @@ void setup() {
 }
 
 void loop() {
-    if (mode.isStandby) bot.write();
+    if (mode.isStandby) {
+    }
     else mode.play();
 
     mode.wait();
