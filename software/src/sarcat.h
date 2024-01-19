@@ -2,8 +2,7 @@
 // Bohlebots
 // header für BohleBots Hauptplatinen
 
-// Einfach in das Verzeichnis mit der .ino Datei legen und benutzen
-// die vier Motor-Outputs und die vier 12Bit Analog-Inputs sind vordefiniert
+    // die vier Motor-Outputs und die vier 12Bit Analog-Inputs sind vordefiniert
 // motor(nr,speed) und input(nr)
 // zusätzlich gibt es den Wrapper digit, der das Analoge Signal der Inputs als
 // digital-Signal True oder False zurück gibt, True bei closed, False bei open
@@ -58,10 +57,8 @@
 //#define io2 2
 
 #define kicker 17
-#define dribbler 2
 #define IR_ADDRESS 0x55
-#define PIXY_ADRESSE    0x54
-#define KOMPASS_ADRESSE 0x60 // cmps11, cmps12, cmps14
+#define PIXY_ADRESSE 0x54
 #define ANGLE_8 1
 
 
@@ -153,6 +150,19 @@ public:
             else
                 delay(1);
         }
+    }
+
+    void write() {
+        warte(1500);
+        Serial.println("Debug-Info");
+        Serial.print("Ballrichtung : ");
+        Serial.println(ballDirection);
+        Serial.print("Ballzone     : ");
+        Serial.println(ballDistance);
+        Serial.print("Ball ist da  : ");
+        Serial.println(ballExists);
+        Serial.println(ballDirection);
+        Serial.println("");
     }
 
     void motor(int number, int speed) {
@@ -247,8 +257,7 @@ public:
         }
     }
 
-    void boardled(int nr,
-                  int farbe) // setzt device led nr (1:links, 2:rechts) auf farbe
+    void boardled(int nr, int farbe) // setzt device led nr (1:links, 2:rechts) auf farbe
 
     {
         if (farbe < 0)
@@ -305,8 +314,11 @@ public:
         Serial.println("done");
     }
 
+    int currentRotation() {
+        if (ballDirection > 0) return 4;
+        else if (ballDirection < 0) return -4;
+    }
 private:
-
     void fahre3(int richtung, int tempo, int drehung) {
         int maxs = abs(tempo) + abs(drehung);
         if (maxs > 100) {
