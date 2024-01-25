@@ -4,12 +4,18 @@ GameModes mode;
 
 void setup() {
     mode.init();
+    mode.isStandby = true;
 }
 
 void loop() {
-    if (mode.isStandby) {
-    }
-    else mode.play();
+    BohleBots bot;
 
-    mode.wait();
+    if (bot.boardTaster(1)) {
+        mode.play();
+    }
+    if (bot.boardTaster(2)) {
+        mode.lightOn = true;
+    }
+
+    bot.warte(5);
 }
