@@ -12,12 +12,8 @@ void GameModes::init() {
     bot.boardLED(2, AUS);
 }
 
-void GameModes::wait() {
-    bot.warte(5);
-}
-
 void GameModes::play() {
-    bot.fahre(bot.ballRichtung(), 30, 0);
+    bot.fahre(bot.ballRichtung(), 30, 5);
 }
 
 
