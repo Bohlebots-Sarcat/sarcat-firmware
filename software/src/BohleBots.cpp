@@ -180,19 +180,38 @@ void BohleBots::kick(int zeit) {
 }
 
 void BohleBots::motor(int number, int speed) {
+    // Speed wird bei 100 und -100 gekappt
     if (speed > 100) speed = 100;
     if (speed < -100) speed = -100;
+
     int pwm = spdToPWM(speed);
     int dir;
+
     if (speed < 0) dir = LOW;
     else dir = HIGH;
 
     switch (number) {
-        case 1: digitalWrite(DRIVE1_DIR, dir);
-        case 2: digitalWrite(DRIVE2_DIR, dir);
-        case 3: digitalWrite(DRIVE3_DIR, dir);
-        case 4: digitalWrite(DRIVE4_DIR, dir);
-        default: Serial.printf("motor not in spectrum! \n");
+        case 1: {
+            digitalWrite(DRIVE1_DIR, dir);
+            break;
+        }
+        case 2: {
+            digitalWrite(DRIVE2_DIR, dir);
+            break;
+        }
+        case 3: {
+            digitalWrite(DRIVE3_DIR, dir);
+            break;
+        }
+        case 4: {
+            digitalWrite(DRIVE4_DIR, dir);
+            break;
+        }
+
+        default: {
+            Serial.printf("Motor not in spectrum");
+            ledcWrite(number, pwm);
+        }
     }
 }
 
@@ -236,7 +255,6 @@ void BohleBots::i2csync() {
     int licht = input(_lichtPin);
     _hatBall = (licht > _ballSchwelle);
 }
-
 
 void BohleBots::fahre3(int richtung, int tempo, int drehung) {
     int maxs = abs(tempo) + abs(drehung);

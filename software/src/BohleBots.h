@@ -58,7 +58,6 @@
 //
 #define PIXY_ADRESSE    0x54
 #define IR_ADRESSE      0x55
-#define KOMPASS_ADRESSE 0x60
 #define ANGLE_8            1
 //
 // Motor PORTS
@@ -593,7 +592,7 @@ class BohleBots {
     int  _kompassWert    = 0;
     // Pixy
     Pixy2I2C pixy;
-    bool _benutztPixy   = false;
+    bool _benutztPixy   = true;
     bool _siehtTor      = false;
     int  _torRichtung   = 0;
     int  _torEntfernung = 0;
