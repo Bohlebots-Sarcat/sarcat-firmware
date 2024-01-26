@@ -5,7 +5,7 @@
 *  BOHLEBOTS HEADER
 *
 *  Version: 0.1.16
-*  Date: 27th March 2023
+*  Date: 25.01.2024
 *
 *  Dieser Header ist eine Sammlung und Kapselung der
 *  Standard-Funktionalitäten eines RoboCup-Soccer-Bots.
@@ -596,6 +596,8 @@ class BohleBots {
     bool _siehtTor      = false;
     int  _torRichtung   = 0;
     int  _torEntfernung = 0;
+    // IR
+    int _irpaket;
     // Zeiten
     elapsedMillis totZeit;    // CoolDown-Timer, damit der Kicker nicht ueberhitzt
     elapsedMillis warteZeit;  // Timer fuer die warte()-Funktion

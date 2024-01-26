@@ -180,40 +180,25 @@ void BohleBots::kick(int zeit) {
 }
 
 void BohleBots::motor(int number, int speed) {
-    // Speed wird bei 100 und -100 gekappt
-    if (speed > 100) speed = 100;
-    if (speed < -100) speed = -100;
+    // Ensure speed is within valid range [-100, 100]
+    speed = constrain(speed, -100, 100);
 
+    // Convert speed to PWM value
     int pwm = spdToPWM(speed);
-    int dir;
 
-    if (speed < 0) dir = LOW;
-    else dir = HIGH;
+    // Set direction based on speed sign
+    int dir = (speed < 0) ? LOW : HIGH;
 
-    switch (number) {
-        case 1: {
-            digitalWrite(DRIVE1_DIR, dir);
-            break;
-        }
-        case 2: {
-            digitalWrite(DRIVE2_DIR, dir);
-            break;
-        }
-        case 3: {
-            digitalWrite(DRIVE3_DIR, dir);
-            break;
-        }
-        case 4: {
-            digitalWrite(DRIVE4_DIR, dir);
-            break;
-        }
+    // Set direction for the specified motor number
+    if (number == 1) digitalWrite(DRIVE1_DIR, dir);
+    else if (number == 2) digitalWrite(DRIVE2_DIR, dir);
+    else if (number == 3) digitalWrite(DRIVE3_DIR, dir);
+    else if (number == 4) digitalWrite(DRIVE4_DIR, dir);
 
-        default: {
-            Serial.printf("Motor not in spectrum");
-            ledcWrite(number, pwm);
-        }
-    }
+    // Write PWM value to the specified motor number if valid
+    if (number > 0 && number < 5) ledcWrite(number, pwm);
 }
+
 
 int BohleBots::spdToPWM(int speed) {
     if (speed < 0) speed *= -1;

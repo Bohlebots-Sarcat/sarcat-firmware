@@ -16,6 +16,7 @@ public:
      *
      **********************************************/
     bool isStandby;
+    bool isPlaying;
     bool lightOn;
     /***********************************************
      *
@@ -29,14 +30,28 @@ public:
     void init();
     /************************************************
      *
-     * GameModes::play()
+     *  GameModes::play()
      *
      * Description:
      *   Implements the standard strategy for the bot.
      *
      ************************************************/
     void play();
+    /************************************************
+     *
+     *  GameModes::
+     */
+     void write();
 private:
+    /***********************************************
+     *
+     *  GameModes::statusLED()
+     *
+     *  Description:
+     *      responsible for changing LED Colors based on sensor outputs.
+     *
+     ***********************************************/
+    void statusLED();
 
 };
 

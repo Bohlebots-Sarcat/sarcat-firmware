@@ -13,7 +13,16 @@ void GameModes::init() {
 }
 
 void GameModes::play() {
-    bot.fahre(bot.ballRichtung(), 30, 5);
+    if (lightOn) statusLED();
+
+    bot.fahre(bot.ballRichtung(), 30, 0);
+
 }
+
+void GameModes::statusLED() {
+    bot.boardLED(1, bot.siehtBall() ? GRUEN : ROT);
+    bot.boardLED(2, bot.siehtTor() ? GRUEN : ROT);
+}
+
 
 
