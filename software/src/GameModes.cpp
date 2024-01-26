@@ -24,7 +24,9 @@ void GameModes::run() {
 }
 
 void GameModes::write() {
-
+    bot.warte(1500);
+    Serial.printf("Ball Richtung: %d\n", bot.ballRichtung());
+    Serial.printf("Tor Richtung: %d\n", bot.torRichtung());
 }
 
 void GameModes::toggle(int button) {
