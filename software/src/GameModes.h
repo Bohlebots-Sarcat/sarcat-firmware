@@ -5,19 +5,18 @@
 #ifndef SOFTWARE_GAMEMODES_H
 #define SOFTWARE_GAMEMODES_H
 
+enum MODE {
+    STANDBY = 0,
+    PLAYING
+};
+
+enum LED {
+    OFF = 0,
+    ON
+};
+
 class GameModes {
 public:
-    /***********************************************
-     *
-     *   Status modes of the bot:
-     *
-     *   bool isStandby = if bot !playing
-     *   bool lightOn = activates lights of bot
-     *
-     **********************************************/
-    bool isStandby;
-    bool isPlaying;
-    bool lightOn;
     /***********************************************
      *
      *  GameModes::init()
@@ -30,28 +29,60 @@ public:
     void init();
     /************************************************
      *
-     *  GameModes::play()
+     *  GameModes::run()
      *
-     * Description:
-     *   Implements the standard strategy for the bot.
+     *  Description:
+     *      Implements the standard behavior of the bot.
      *
      ************************************************/
-    void play();
+    void run();
     /************************************************
      *
-     *  GameModes::
+     *  GameModes::write()
+     *
+     *  Description:
+     *      writes important sensor-data to the Serial Monitor.
+     *
+     ***********************************************/
+    void write();
+    /************************************************
+     *
+     *  GameModes::toggle()
+     *
+     *  Description:
+     *      Toggles the state of a button input, creating an on-off switch functionality.
+     *
      */
-     void write();
+    void toggle(int button);
 private:
     /***********************************************
      *
      *  GameModes::statusLED()
      *
      *  Description:
-     *      responsible for changing LED Colors based on sensor outputs.
+     *      Responsible for changing LED Colors based on sensor outputs.
      *
      ***********************************************/
     void statusLED();
+    /************************************************
+     *
+     *  GameModes::play()
+     *
+     *  Description:
+     *      Executing strategy of bot.
+     *
+     ***********************************************/
+    void play();
+
+    /// Mode State Variables ///
+
+    int currentMode;
+    int currentLED;
+
+    /// Speed Variables ///
+
+    const int NORMALSPEED = 35;
+    const int STRIKESPEED = 60;
 
 };
 

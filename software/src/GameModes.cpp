@@ -12,16 +12,55 @@ void GameModes::init() {
     bot.boardLED(2, AUS);
 }
 
-void GameModes::play() {
-    if (lightOn) statusLED();
+void GameModes::run() {
+    switch (currentMode) {
+        case STANDBY: {
+            currentLED = ON;
+        }
+        case PLAYING: {
+            play();
+        }
+    }
+}
 
-    bot.fahre(bot.ballRichtung(), 30, 0);
+void GameModes::write() {
 
+}
+
+void GameModes::toggle(int button) {
+    switch (button) {
+        case 1: {
+            switch (currentMode) {
+                case STANDBY:
+                    currentMode = PLAYING;
+                    break;
+                case PLAYING:
+                    currentMode = STANDBY;
+                    break;
+            }
+            break;
+        }
+        case 2: {
+            switch (currentLED) {
+                case OFF:
+                    currentLED = ON;
+                    break;
+                case ON:
+                    currentLED = OFF;
+                    break;
+            }
+            break;
+        }
+    }
 }
 
 void GameModes::statusLED() {
     bot.boardLED(1, bot.siehtBall() ? GRUEN : ROT);
     bot.boardLED(2, bot.siehtTor() ? GRUEN : ROT);
+}
+
+void GameModes::play() {
+    bot.drive(bot.ballRichtung(), NORMALSPEED, bot.torRichtung() / 2);
 }
 
 
