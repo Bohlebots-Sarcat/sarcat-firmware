@@ -284,7 +284,7 @@ class BohleBots {
     void warte(int zeit);
     /************************************************************
     *
-    *   BohleBots::fahre(int, int, int)
+    *   BohleBots::drive(int, int, int)
     *
     *   Beschreibung:
     *     laesst den Roboter in eine bestimmte Richtung,
@@ -314,7 +314,7 @@ class BohleBots {
     *       Eine Implementierung mit BotTyp 2 existiert nicht!
     *
     ************************************************************/
-    void fahre(int richtung, int tempo, int drehung);
+    void drive(int richtung, int tempo, int drehung);
     /************************************************************
     *
     *   BohleBots::ballFahre()

@@ -70,7 +70,7 @@ void BohleBots::warte(int zeit) {
 }
 
 
-void BohleBots::fahre(int richtung, int tempo, int drehung) {
+void BohleBots::drive(int richtung, int tempo, int drehung) {
     fahre3(richtung, tempo, drehung);
 }
 
