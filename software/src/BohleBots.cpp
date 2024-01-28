@@ -20,8 +20,10 @@ BohleBots::BohleBots() {
     pinMode(INPUT3, INPUT);
     pinMode(INPUT4, INPUT);
 
-    pinMode(kicker, OUTPUT);  digitalWrite(kicker, LOW);
-    pinMode(dribbler, OUTPUT);digitalWrite(dribbler, LOW);
+    pinMode(kicker, OUTPUT);
+    digitalWrite(kicker, LOW);
+    pinMode(dribbler, OUTPUT);
+    digitalWrite(dribbler, LOW);
 
     pinMode(led1r, OUTPUT);
     digitalWrite(led1r, HIGH);
@@ -56,11 +58,11 @@ BohleBots::BohleBots() {
 }
 
 void BohleBots::init() {
-    for (int lauf = 0; lauf < 8; lauf++) {
-        Wire.beginTransmission(_tastLedID[lauf]);
+    for (int i = 0; i < 8; i++) {
+        Wire.beginTransmission(_tastLedID[i]);
         byte error = Wire.endTransmission();
-        if (error == 0) _portena[lauf] = true;
-        Serial.print("LED_Tast : " + String(lauf) + " : ");
+        if (error == 0) _portena[i] = true;
+        Serial.print("LED_Tast : " + String(i) + " : ");
         if (error == 0) Serial.println("true");
         else Serial.println("false");
     }
@@ -74,14 +76,14 @@ void BohleBots::init() {
     if (_hasPixy) {
         Serial.print("Warte auf Pixy2 auf i2c 0x54...");
         pixy.init(0x54);
-        Serial.println("done");}
+        Serial.println("done");
+    }
 }
 
 void BohleBots::sleep(int ms) {
     sleepDuration = 0;
     i2csync();
-    while (sleepDuration < ms)
-    {
+    while (sleepDuration < ms) {
         if ((sleepDuration % 10) == 0)
             i2csync();
         else
@@ -109,12 +111,10 @@ void BohleBots::i2csync() {
             int ledwert = 255 - _led1Array[lauf] - _led2Array[lauf];
             Wire.beginTransmission(_tastLedID[lauf]);
             Wire.write(ledwert);
-
             Wire.endTransmission();
 
             Wire.requestFrom(_tastLedID[lauf], 1);
-            if (Wire.available())
-            {
+            if (Wire.available()) {
                 int tread = 255 - Wire.read();
                 tread = tread % 128;
                 if (tread > 63)
@@ -131,8 +131,7 @@ void BohleBots::i2csync() {
     } // ENDE TastLED
     _irData = 0;
     Wire.requestFrom(IR_ADDRESS, 1);
-    if (Wire.available())
-    {
+    if (Wire.available()) {
         _irData = Wire.read();
     }
 
@@ -142,12 +141,10 @@ void BohleBots::i2csync() {
     if (!_seesBall)
         _ballDirection = 0;
 
-    if (_compassEna == true)
-    {
+    if (_compassEna == true) {
         _compassData = readCompass();
     }
-    if (_hasPixy)
-    {
+    if (_hasPixy) {
         readPixy();
     }
 }
@@ -191,13 +188,11 @@ void BohleBots::LED(int device, int LED, int color) {
 
     // portena[device] = true;
 
-    if (LED == 1)
-    {
+    if (LED == 1) {
         color = color * 2;
         _led1Array[device] = color;
     }
-    if (LED == 2)
-    {
+    if (LED == 2) {
         color = color * 16;
         if (color > 63)
             color = color + 64;
@@ -212,14 +207,12 @@ void BohleBots::boardLED(int LED, int color) {
         if (color > 7)
             return;
 
-        if (LED == 1)
-        {
+        if (LED == 1) {
             digitalWrite(led1g, !(color & 1));
             digitalWrite(led1r, !(color & 2));
             digitalWrite(led1b, !(color & 4));
         }
-        if (LED == 2)
-        {
+        if (LED == 2) {
             digitalWrite(led2g, !(color & 1));
             digitalWrite(led2r, !(color & 2));
             digitalWrite(led2b, !(color & 4));
@@ -232,13 +225,10 @@ void BohleBots::readPixy() {
     pixy.ccc.getBlocks();
     _seesGoal=false;
     // If there are detect blocks, print them!
-    if (pixy.ccc.numBlocks)
-    {
+    if (pixy.ccc.numBlocks) {
         evaluatePixy();
         _seesGoal = true;
-    }
-    else
-    {
+    } else {
         _goalDirection = compass();
     }
 }
@@ -246,8 +236,7 @@ void BohleBots::readPixy() {
 void BohleBots::evaluatePixy() {
     int my_signature = 1; // wir spielen immer auf Signatur 1
     int sieht_farbe = pixy.ccc.blocks[0].m_signature;
-    if (sieht_farbe == my_signature)
-    {
+    if (sieht_farbe == my_signature) {
         _goalDirection = (pixy.ccc.blocks[0].m_x - 158) / 2;
         _goalWidth = pixy.ccc.blocks[0].m_width;
         _goalHeight = pixy.ccc.blocks[0].m_height;
@@ -263,8 +252,7 @@ void BohleBots::evaluatePixy() {
 void BohleBots::compassHeading() {
     Wire.beginTransmission(KOMPASS_ADRESSE);
     byte error = Wire.endTransmission();
-    if (error == 0)
-    {
+    if (error == 0) {
         _compassHeading = compassOrg();
     }
 }
@@ -337,8 +325,7 @@ void BohleBots::drive(int direction, int speed, int rotation) {
 
 void BohleBots::drive2(int speed, int rotation) {
     int maxs = abs(speed) + abs(rotation);
-    if (maxs > 100)
-    {
+    if (maxs > 100) {
         speed = speed * 100 / maxs;
         rotation = rotation * 100 / maxs;
     }
@@ -348,8 +335,7 @@ void BohleBots::drive2(int speed, int rotation) {
 
 void BohleBots::drive3(int direction, int speed, int rotation) {
     int maxs = abs(speed) + abs(rotation);
-    if (maxs > 100)
-    {
+    if (maxs > 100) {
         speed = speed * 100 / maxs;
         rotation = rotation * 100 / maxs;
     }
@@ -391,5 +377,3 @@ int BohleBots::speedToPWm(int speed) {
         speed *= -1;
     return ((speed * 255) / 100);
 }
-
-
