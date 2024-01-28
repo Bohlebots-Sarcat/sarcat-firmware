@@ -48,21 +48,32 @@ BohleBots::BohleBots() {
     ledcAttachPin(DRIVE4_PWM, 4);
     ledcSetup(4, 1000, 8);
     ledcWrite(4, 0);
-    boardLED(1, AUS);
-    boardLED(2, AUS);
+    boardLED(1, static_cast<FARBE>(AUS));
+    boardLED(2, static_cast<FARBE>(AUS));
 }
 
 void BohleBots::init() {
+    for (int lauf = 0; lauf < 8; lauf++) {
+        Wire.beginTransmission(_tastLedID[lauf]);
+        byte error = Wire.endTransmission();
+        if (error == 0)
+            _portena[lauf] = true;
+        Serial.print("LED_Tast : " + String(lauf) + " : ");
+        if (error == 0)
+            Serial.println("true");
+        else
+            Serial.println("false");
+    }
+    delay(100);
+
     Serial.print("Warte auf Pixy2 auf i2c 0x54...");
-    pixy.init(PIXY_ADRESSE);
+    pixy.init(0x54);
     Serial.println("done");
 }
 
 void BohleBots::warte(int zeit) {
     warteZeit = 0;
     i2csync();
-    if (_benutztPixy) pixy_read();
-    else _torRichtung = kompassRichtung();
     while (warteZeit < zeit) {
         if ((warteZeit % 10) == 0) i2csync();
         else delay(1);
@@ -208,37 +219,37 @@ int BohleBots::spdToPWM(int speed) {
 void BohleBots::i2csync() {
     for (int lauf = 0; lauf < 8; lauf++) {
         if (_portena[lauf]) {
-            int ledWert = 255 - _led1Array[lauf] - _led2Array[lauf];
+            int ledwert = 255 - _led1Array[lauf] - _led2Array[lauf];
             Wire.beginTransmission(_tastLedID[lauf]);
-            Wire.write(ledWert);;
+            Wire.write(ledwert);;
             Wire.endTransmission();
+
             Wire.requestFrom(_tastLedID[lauf], 1);
             if (Wire.available()) {
                 int tread = 255 - Wire.read();
                 tread = tread % 128;
-                if (tread > 63) _taster2Array[lauf] = true;
-                else _taster2Array[lauf] = false;
+                if (tread > 63)
+                    _taster2Array[lauf] = true;
+                else
+                    _taster2Array[lauf] = false;
                 tread = tread % 2;
-                if (tread > 0) _taster1Array[lauf] = true;
-                else _taster1Array[lauf] = false;
+                if (tread > 0)
+                    _taster1Array[lauf] = true;
+                else
+                    _taster1Array[lauf] = false;
             }
         }
-    }
-    int irPaket = 0;
+    } // ENDE TastLED
+    _irpaket = 0;
     Wire.requestFrom(IR_ADRESSE, 1);
-    if (Wire.available()) irPaket = Wire.read();
+    _irpaket = Wire.read();
 
-    int _zone;
-    bool _ballVorhanden;
-    _ballRichtung = (irPaket % 16) - 7; // -10, da neuer IR Ring von 7 bis 18 und nicht von -7 - 8
-    _zone = irPaket / 16;
-    _ballVorhanden = (_zone != 0);
-    if (!_ballVorhanden) _ballRichtung = 0;
-
-
-    // Lichtschranke (nicht wirklich i2c...)
-    int licht = input(_lichtPin);
-    _hatBall = (licht > _ballSchwelle);
+    _ballRichtung = (_irpaket % 16) - 7;
+    _ballDistanz = _irpaket / 16;
+    _ballVorhanden = (_ballDistanz != 0);
+    if (!_ballVorhanden)
+        _ballRichtung = 0;
+    pixy_read();
 }
 
 void BohleBots::fahre3(int richtung, int tempo, int drehung) {
@@ -249,7 +260,7 @@ void BohleBots::fahre3(int richtung, int tempo, int drehung) {
     }
     switch (richtung) {
         case 0: // geradeaus
-            motor(1, -tempo + drehung);
+            motor(1, -tempo + drehung   );
             motor(2, +drehung);
             motor(3, tempo + drehung);
             break;

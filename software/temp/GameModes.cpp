@@ -10,23 +10,32 @@ void GameModes::init() {
     bot.init();
     bot.boardLED(1, AUS);
     bot.boardLED(2, AUS);
+
+    currentMode = STANDBY;
+    currentLED = OFF;
 }
 
 void GameModes::run() {
     switch (currentMode) {
         case STANDBY: {
+            write();
             currentLED = ON;
+            break;
         }
         case PLAYING: {
             play();
+            break;
         }
     }
+    write();
+    if (currentLED == ON) {
+        statusLED();
+    }
+
 }
 
 void GameModes::write() {
-    bot.warte(1500);
-    Serial.printf("Ball Richtung: %d\n", bot.ballRichtung());
-    Serial.printf("Tor Richtung: %d\n", bot.torRichtung());
+    Serial.println(bot._irpaket);
 }
 
 void GameModes::toggle(int button) {

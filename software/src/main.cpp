@@ -1,19 +1,14 @@
-#include "GameModes.h"
+#include "BohleBots.h"
 
-GameModes mode;
+BohleBots bot;
 
 void setup() {
-    mode.init();
-    mode.isStandby = true;
+    bot.init();
+    bot.setType(3);
+    bot.boardLED(1, OFF);
+    bot.boardLED(2, OFF);
 }
 
 void loop() {
-    BohleBots bot;
-
-    if (bot.boardTaster(1)) mode.toggle(1);
-    if (bot.boardTaster(2)) mode.toggle(2);
-
-    mode.run();
-
-    bot.warte(5);
+    bot.sleep(5);
 }

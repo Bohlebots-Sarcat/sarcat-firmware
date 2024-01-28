@@ -560,7 +560,15 @@ class BohleBots {
     *      setzt die jeweilige LED 1-4 auf farbe
     ************************************************************/
     void boardLED(int nr, FARBE farbe);
-  //////////////////////////////////////////////////////////////////////////////
+
+    bool _ballVorhanden = false;
+    int  _ballRichtung  = 0;
+    int _ballDistanz = 0;
+    bool _hatBall       = false;
+
+    int _irpaket;
+
+    //////////////////////////////////////////////////////////////////////////////
   // ---------------------------------------------------------------------------
   // ENDE DESSEN, WAS DER USER DIESES HEADERS WISSEN MUSS!
   // Ab hier folgen private Variablen und Funktionen.
@@ -581,9 +589,6 @@ class BohleBots {
     //
     // BotTyp
     // Ball
-    bool _ballVorhanden = false;
-    int  _ballRichtung  = 0;
-    bool _hatBall       = false;
     int  _lichtPin      = 0;
     unsigned int _ballSchwelle = 500;
     // Kompass
@@ -597,7 +602,6 @@ class BohleBots {
     int  _torRichtung   = 0;
     int  _torEntfernung = 0;
     // IR
-    int _irpaket;
     // Zeiten
     elapsedMillis totZeit;    // CoolDown-Timer, damit der Kicker nicht ueberhitzt
     elapsedMillis warteZeit;  // Timer fuer die warte()-Funktion

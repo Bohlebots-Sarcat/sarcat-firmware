@@ -2,7 +2,7 @@
 //---- Header System of Sarcat - #Gamemodes ----//
 
 #include "BohleBots.h"
-#ifndef SOFTWARE_GAMEMODES_H
+#ifndef SOFTWARE_GAMEMODES_Ha
 #define SOFTWARE_GAMEMODES_H
 
 enum MODE {
