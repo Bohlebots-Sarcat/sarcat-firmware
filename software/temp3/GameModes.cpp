@@ -1,25 +1,23 @@
-//
-// Created by Jan Schlegel on 19.01.24.
-//
-
 #include "GameModes.h"
 
 BohleBots bot;
 
 void GameModes::init() {
     bot.init();
-    bot.boardLED(1, AUS);
-    bot.boardLED(2, AUS);
+    bot.boardLED(1, OFF);
+    bot.boardLED(2, OFF);
+
+    bot.setType(3);
 
     currentMode = STANDBY;
-    currentLED = OFF;
+    currentLED = 1;
 }
 
 void GameModes::run() {
     switch (currentMode) {
         case STANDBY: {
             write();
-            currentLED = ON;
+            currentLED = 1;
             break;
         }
         case PLAYING: {
@@ -28,14 +26,14 @@ void GameModes::run() {
         }
     }
     write();
-    if (currentLED == ON) {
+    if (currentLED == 1) {
         statusLED();
     }
 
 }
 
 void GameModes::write() {
-    Serial.println(bot._irpaket);
+    Serial.println(bot.ballDirection());
 }
 
 void GameModes::toggle(int button) {
@@ -53,11 +51,11 @@ void GameModes::toggle(int button) {
         }
         case 2: {
             switch (currentLED) {
-                case OFF:
-                    currentLED = ON;
+                case 0:
+                    currentLED = 1;
                     break;
-                case ON:
-                    currentLED = OFF;
+                case 1:
+                    currentLED = 0;
                     break;
             }
             break;
@@ -66,12 +64,12 @@ void GameModes::toggle(int button) {
 }
 
 void GameModes::statusLED() {
-    bot.boardLED(1, bot.siehtBall() ? GRUEN : ROT);
-    bot.boardLED(2, bot.siehtTor() ? GRUEN : ROT);
+    if (bot.seesBall()) bot.boardLED(1, GREEN); else bot.boardLED(1, RED);
+    if (bot.seesGoal()) bot.boardLED(2, GREEN); else bot.boardLED(2, RED);
 }
 
 void GameModes::play() {
-    bot.drive(bot.ballRichtung(), NORMALSPEED, bot.torRichtung() / 2);
+
 }
 
 

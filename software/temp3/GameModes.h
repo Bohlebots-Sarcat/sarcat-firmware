@@ -2,17 +2,12 @@
 //---- Header System of Sarcat - #Gamemodes ----//
 
 #include "BohleBots.h"
-#ifndef SOFTWARE_GAMEMODES_Ha
+#ifndef SOFTWARE_GAMEMODES_H
 #define SOFTWARE_GAMEMODES_H
 
 enum MODE {
     STANDBY = 0,
     PLAYING
-};
-
-enum LED {
-    OFF = 0,
-    ON
 };
 
 class GameModes {
@@ -83,6 +78,10 @@ private:
 
     const int NORMALSPEED = 35;
     const int STRIKESPEED = 60;
+
+    /// Rotation ///
+
+    int currentRotation;
 
 };
 

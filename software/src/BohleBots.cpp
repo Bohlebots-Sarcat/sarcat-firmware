@@ -73,11 +73,11 @@ void BohleBots::init() {
     if (error == 0) _compassEna = true;
     if (error == 0) Serial.println("Kompass true");
     else Serial.println("Kompass false");
-    if (_hasPixy) {
-        Serial.print("Warte auf Pixy2 auf i2c 0x54...");
-        pixy.init(0x54);
-        Serial.println("done");
-    }
+
+    Serial.print("Warte auf Pixy2 auf i2c 0x54...");
+    pixy.init(0x54);
+    Serial.println("done");
+
 }
 
 void BohleBots::sleep(int ms) {
@@ -144,9 +144,7 @@ void BohleBots::i2csync() {
     if (_compassEna == true) {
         _compassData = readCompass();
     }
-    if (_hasPixy) {
-        readPixy();
-    }
+    readPixy();
 }
 
 int BohleBots::input(int nr) {
@@ -310,17 +308,19 @@ void BohleBots::motor(int number, int speed) {
 }
 
 void BohleBots::drive(int direction, int speed, int rotation) {
-    switch (_botType) {
-        case 2: {
-            drive2(speed, rotation);
-            break;
-        }
-        case 3: {
-            drive3(direction, speed, rotation);
-            break;
-        }
-        default: Serial.printf("Error while trying to drive!");
-    }
+//    switch (_botType) {
+//        case 2: {
+//            drive2(speed, rotation);
+//            break;
+//        }
+//        case 3: {
+//            drive3(direction, speed, rotation);
+//            break;
+//        }
+//        default: Serial.printf("Error while trying to drive: %d", _botType);
+//    }
+
+    drive3(direction, speed, rotation);
 }
 
 void BohleBots::drive2(int speed, int rotation) {
@@ -339,37 +339,85 @@ void BohleBots::drive3(int direction, int speed, int rotation) {
         speed = speed * 100 / maxs;
         rotation = rotation * 100 / maxs;
     }
-    if (direction == 0) {
-        motor(1, -speed + rotation);
-        motor(2, +rotation);
-        motor(3, speed + rotation);
-    } else if (direction == 1) {
-        motor(1, -speed + rotation);
-        motor(2, speed + rotation);
-        motor(3, +rotation);
-    } else if (direction == 2) {
-        motor(1, +rotation);
-        motor(2, speed + rotation);
-        motor(3, -speed + rotation);
-    } else if (direction == 3) {
-        motor(1, speed + rotation);
-        motor(2, +rotation);
-        motor(3, -speed + rotation);
-    } else if (direction == -2) {
-        motor(1, speed + rotation);
-        motor(2, -speed + rotation);
-        motor(3, +rotation);
-    } else if (direction == -1) {
-        motor(1, +rotation);
-        motor(2, -speed + rotation);
-        motor(3, speed + rotation);
-    } else {
-        // Handle the case when 'direction' is not any of the specified values
+    switch (direction) {
+        case 0:
+            motor(1, -speed + rotation);
+            motor(2, +rotation);
+            motor(3, speed + rotation);
+            break;
+        case 1:
+            motor(1, -speed + rotation);
+            motor(2, speed + rotation);
+            motor(3, +rotation);
+            break;
+        case 2:
+            motor(1, -48);
+            motor(2, 80);
+            motor(3, -48);
+            break;
+        case 3:
+            motor(1, +rotation);
+            motor(2, speed + rotation);
+            motor(3, -speed + rotation);
+            break;
+        case 4:
+            motor(1, speed + rotation);
+            motor(2, +rotation);
+            motor(3, -speed + rotation);
+            break;
+        case -3:
+            motor(1, speed + rotation);
+            motor(2, -speed + rotation);
+            motor(3, +rotation);
+            break;
+        case -2:
+            motor(1, 48);
+            motor(2, -80);
+            motor(3, 48);
+            break;
+        case -1:
+            motor(1, +rotation);
+            motor(2, -speed + rotation);
+            motor(3, speed + rotation);
+            break;
+        default:
+            motor(1, 0);
+            motor(2, 0);
+            motor(3, 0);
+            break;
     }
+
 }
 
 int BohleBots::ballDirection() {
     return _ballDirection;
+}
+
+bool BohleBots::seesBall() {
+    return _seesBall;
+}
+
+int BohleBots::goalDirection() {
+    return _goalDirection;
+}
+
+bool BohleBots::seesGoal() {
+    return _seesGoal;
+}
+
+bool BohleBots::goalAligned() {
+    if (abs(_goalDirection) < 23) return true;
+    if (abs(_goalDirection) > 23) return false;
+}
+
+bool BohleBots::goalLeft() {
+    if (_goalDirection > 50) return true;
+    else return false;
+}
+
+bool BohleBots::goalRight() {
+    if (_goalDirection < 50) return true;
+    else return false;
 }
 
 int BohleBots::speedToPWm(int speed) {
