@@ -428,9 +428,6 @@ int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
     static float velocity[] = {0.0, 0.0, 0.0};
     static float position[] = {0.0, 0.0, 0.0};
 
-    float dt = 0.016;
-    float tolerance = 0.1;  // Adjust this value based on your requirements
-
     static unsigned long previousMillis = 0;
     unsigned long currentMillis = millis();
 
@@ -444,28 +441,28 @@ int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
         error = Wire.endTransmission();
         if (error != 0) return error;
 
-        Wire.requestFrom(COMPASS_ADDRESS, 1);
-        while (!Wire.available());
+        Wire.requestFrom(COMPASS_ADDRESS, 2);
+        while (Wire.available() < 2);
         high_byte = Wire.read();
-
-        Wire.beginTransmission(COMPASS_ADDRESS);
-        Wire.write(addresses[i] + 1);
-        error = Wire.endTransmission();
-        if (error != 0) return error;
-
-        Wire.requestFrom(COMPASS_ADDRESS, 1);
-        while (!Wire.available());
         low_byte = Wire.read();
 
+        // Combine high and low bytes to get 16-bit signed value
         data[i] = (int16_t)((high_byte << 8) | low_byte);
 
-        velocity[i] += convertToLinearAcceleration(data[i]) * dt;
+        // Integrate acceleration data to get velocity
+        velocity[i] += convertToLinearAcceleration(data[i]) * dt_actual;
 
+        // Integrate velocity data to get position
         float nextPosition = position[i] + velocity[i] * dt_actual;
 
-        if (abs(position[i] - nextPosition) > tolerance) {
-            // Only update the position if necessary
-            position[i] = nextPosition;
+        // Apply a simple low-pass filter to reduce noise
+        position[i] = 0.9 * position[i] + 0.1 * nextPosition;
+
+        // Check if the acceleration is close to zero, indicating rest
+        if (abs(data[i]) < 20) {
+            // If the acceleration is close to zero, reset the velocity and position
+            velocity[i] = 0.0;
+            position[i] = position[i];
         }
     }
 
@@ -480,6 +477,10 @@ int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
     x = position[0];
     y = position[1];
     z = position[2];
+
+    x = x / 10;
+    y = y / 10;
+    z = z / 10;
 
     return 0;
 }

@@ -41,6 +41,12 @@ void loop() {
     Serial.print(",");
     Serial.println(bot.z);
 
+//    Serial.print(acceleration.x);
+//    Serial.print(",");
+//    Serial.print(acceleration.y);
+//    Serial.print(",");
+//    Serial.println(acceleration.z);
+
     if (bot.boardButton(1)) {
         mode.toggle(1);
         delay(200);
@@ -122,7 +128,7 @@ void loop() {
             }
             if (bot.ballDirection() != 0) {
                 if (ballDirection == 1) {
-                   if (bot.ballDirection() != -1) {
+                    if (bot.ballDirection() != -1) {
                         bot.drive(0, 0, currentBallRotation);
                     }
                 }
