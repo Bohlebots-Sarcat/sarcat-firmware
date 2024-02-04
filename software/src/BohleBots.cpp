@@ -68,7 +68,8 @@ void BohleBots::init() {
     }
 
     delay(100);
-    Wire.beginTransmission(KOMPASS_ADRESSE);
+
+    Wire.beginTransmission(COMPASS_ADDRESS);
     byte error = Wire.endTransmission();
     if (error == 0) _compassEna = true;
     if (error == 0) Serial.println("Kompass true");
@@ -101,7 +102,8 @@ void BohleBots::setType(int type) {
             _botType = 3;
             break;
         }
-        default: Serial.printf("Bot type not in spectrum \n");
+        default:
+            Serial.printf("Bot type not in spectrum \n");
     }
 }
 
@@ -219,36 +221,30 @@ void BohleBots::boardLED(int LED, int color) {
 }
 
 void BohleBots::readPixy() {
-    // grab blocks!
     pixy.ccc.getBlocks();
-    _seesGoal=false;
-    // If there are detect blocks, print them!
+    _seesGoal = false;
     if (pixy.ccc.numBlocks) {
-        evaluatePixy();
+        evaluatePixy(1);
         _seesGoal = true;
-    } else {
-        _goalDirection = compass();
     }
 }
 
-void BohleBots::evaluatePixy() {
-    int my_signature = 1; // wir spielen immer auf Signatur 1
+void BohleBots::evaluatePixy(int signature) {
     int sieht_farbe = pixy.ccc.blocks[0].m_signature;
-    if (sieht_farbe == my_signature) {
-        _goalDirection = (pixy.ccc.blocks[0].m_x - 158) / 2;
-        _goalWidth = pixy.ccc.blocks[0].m_width;
-        _goalHeight = pixy.ccc.blocks[0].m_height;
-        _rawDistance = pixy.ccc.blocks[0].m_y;
-        _goalDistance = (_rawDistance - _goalHeight) / 4;
-        if (_goalDistance < 0)
-            _goalDistance = 0;
-        if (_goalDistance > 63)
-            _goalDistance = 63;
+
+    if (signature == 1) {
+        if (sieht_farbe == 1) {
+            _goalDirection = (pixy.ccc.blocks[0].m_x - 158) / 2;
+            _goalWidth = pixy.ccc.blocks[0].m_width;
+            _goalHeight = pixy.ccc.blocks[0].m_height;
+            _rawDistance = pixy.ccc.blocks[0].m_y;
+            _goalDistance = (_rawDistance - _goalHeight) / 4;
+        }
     }
 }
 
 void BohleBots::compassHeading() {
-    Wire.beginTransmission(KOMPASS_ADRESSE);
+    Wire.beginTransmission(COMPASS_ADDRESS);
     byte error = Wire.endTransmission();
     if (error == 0) {
         _compassHeading = compassOrg();
@@ -258,12 +254,11 @@ void BohleBots::compassHeading() {
 int BohleBots::compassOrg() {
     unsigned char high_byte, low_byte, angle8;
     unsigned int angle16;
-    Wire.beginTransmission(KOMPASS_ADRESSE);
+    Wire.beginTransmission(COMPASS_ADDRESS);
     Wire.write(ANGLE_8);
     Wire.endTransmission();
-    Wire.requestFrom(KOMPASS_ADRESSE, 3);
-    while (Wire.available() < 3)
-        ;
+    Wire.requestFrom(COMPASS_ADDRESS, 3);
+    while (Wire.available() < 3);
     angle8 = Wire.read(); // Read back the 5 bytes
     high_byte = Wire.read();
     low_byte = Wire.read();
@@ -308,18 +303,6 @@ void BohleBots::motor(int number, int speed) {
 }
 
 void BohleBots::drive(int direction, int speed, int rotation) {
-//    switch (_botType) {
-//        case 2: {
-//            drive2(speed, rotation);
-//            break;
-//        }
-//        case 3: {
-//            drive3(direction, speed, rotation);
-//            break;
-//        }
-//        default: Serial.printf("Error while trying to drive: %d", _botType);
-//    }
-
     drive3(direction, speed, rotation);
 }
 
@@ -401,6 +384,10 @@ int BohleBots::goalDirection() {
     return _goalDirection;
 }
 
+int BohleBots::goalDistance() {
+    return _goalDistance;
+}
+
 bool BohleBots::seesGoal() {
     return _seesGoal;
 }
@@ -411,12 +398,14 @@ bool BohleBots::goalAligned() {
 }
 
 bool BohleBots::goalLeft() {
-    if (_goalDirection > 50) return true;
+    if (_goalDirection > 45 && _goalDistance < -3) return true;
+    if (_goalDirection > 30 && _goalDistance > -3) return true;
     else return false;
 }
 
 bool BohleBots::goalRight() {
-    if (_goalDirection < 50) return true;
+    if (_goalDirection < -45 && _goalDistance < -3) return true;
+    if (_goalDirection < -30 && _goalDistance > -3) return true;
     else return false;
 }
 
@@ -424,4 +413,81 @@ int BohleBots::speedToPWm(int speed) {
     if (speed < 0)
         speed *= -1;
     return ((speed * 255) / 100);
+}
+
+int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
+
+    uint8_t addresses[] = {COMPASS_LINEAR_ACCELERATION_X_HIGH, COMPASS_LINEAR_ACCELERATION_Y_HIGH,
+                           COMPASS_LINEAR_ACCELERATION_Z_HIGH};
+    int data[] = {0, 0, 0};
+
+    uint8_t error;
+    uint8_t high_byte;
+    uint8_t low_byte;
+
+    static float velocity[] = {0.0, 0.0, 0.0};
+    static float position[] = {0.0, 0.0, 0.0};
+
+    float dt = 0.016;
+    float tolerance = 0.1;  // Adjust this value based on your requirements
+
+    static unsigned long previousMillis = 0;
+    unsigned long currentMillis = millis();
+
+    float dt_actual = (currentMillis - previousMillis) / 1000.0;  // Convert to seconds
+
+    previousMillis = currentMillis;
+
+    for (int i = 0; i < 3; i++) {
+        Wire.beginTransmission(COMPASS_ADDRESS);
+        Wire.write(addresses[i]);
+        error = Wire.endTransmission();
+        if (error != 0) return error;
+
+        Wire.requestFrom(COMPASS_ADDRESS, 1);
+        while (!Wire.available());
+        high_byte = Wire.read();
+
+        Wire.beginTransmission(COMPASS_ADDRESS);
+        Wire.write(addresses[i] + 1);
+        error = Wire.endTransmission();
+        if (error != 0) return error;
+
+        Wire.requestFrom(COMPASS_ADDRESS, 1);
+        while (!Wire.available());
+        low_byte = Wire.read();
+
+        data[i] = (int16_t)((high_byte << 8) | low_byte);
+
+        velocity[i] += convertToLinearAcceleration(data[i]) * dt;
+
+        float nextPosition = position[i] + velocity[i] * dt_actual;
+
+        if (abs(position[i] - nextPosition) > tolerance) {
+            // Only update the position if necessary
+            position[i] = nextPosition;
+        }
+    }
+
+    acceleration.x = data[0];
+    acceleration.y = data[1];
+    acceleration.z = data[2];
+
+    acceleration.x = convertToLinearAcceleration(data[0]);
+    acceleration.y = convertToLinearAcceleration(data[1]);
+    acceleration.z = convertToLinearAcceleration(data[2]);
+
+    x = position[0];
+    y = position[1];
+    z = position[2];
+
+    return 0;
+}
+
+float BohleBots::convertToLinearAcceleration(int16_t rawValue) {
+    // Shift the 16-bit signed integer by 8 bits to the right (divide by 256)
+    float linearAcceleration = static_cast<float>(rawValue) / 256.0;
+
+    // Convert from m/s² to cm/s²
+    return linearAcceleration * 100.0;
 }
