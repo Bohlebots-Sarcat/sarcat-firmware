@@ -1,20 +1,22 @@
 #include "GameStrategy.h"
 
-
 GameStrategy mode;
-
-elapsedMillis cornerTimer;
 
 int currentGoalRotation;
 int currentBallRotation;
 int goalDirection;
 int ballDirection;
-int directionBuffer;
+int ballCache;
+bool isInCorner;;
+bool kickOff;
 
 void write();
 
 void setup() {
+
     cornerTimer = 0;
+    kickOff = true;
+
     bot.init();
     bot.setType(3);
 
@@ -25,27 +27,10 @@ Acceleration acceleration;
 void loop() {
     bot.sleep(5);
 
-//    Serial.println("Ballrichtung: " + String(bot.ballDirection()));
-//    Serial.println("Torrichtung: " + String(bot.goalDirection()));
-//    Serial.println("Kompassrichtung " + String(bot.readCompass()));
-//    Serial.println("Torrichtung " + String(goalDirection));
-//    Serial.println("Tordistanz: " + String(bot.goalDistance()));
-//    Serial.println("Timer: " + String(cornerTimer));
-
-    // Serial.printf("error: %d\n", bot.readLinearAcceleration(acceleration));
-    bot.readLinearAcceleration(acceleration);
-
-    Serial.print(bot.x);
-    Serial.print(",");
-    Serial.print(bot.y);
-    Serial.print(",");
-    Serial.println(bot.z);
-
-//    Serial.print(acceleration.x);
-//    Serial.print(",");
-//    Serial.print(acceleration.y);
-//    Serial.print(",");
-//    Serial.println(acceleration.z);
+    Serial.println("1: " + String(bot.input(1)));
+    Serial.println("2: " + String(bot.input(2)));
+    Serial.println("3: " + String(bot.input(3)));
+    Serial.println("4: " + String(bot.input(4)));
 
     if (bot.boardButton(1)) {
         mode.toggle(1);
@@ -53,41 +38,36 @@ void loop() {
         cornerTimer = 0;
     }
 
-    if (bot.ballDirection() != directionBuffer) cornerTimer = 0;
+    mode.run();
 
-    directionBuffer = bot.ballDirection();
+    if (mode.currentMode() == 1) {
 
-    if (bot.goalDirection() > 0) {
-        currentGoalRotation = -35;
-        goalDirection = -1;
-    }
-    if (bot.goalDirection() < 0) {
-        currentGoalRotation = 35;
-        goalDirection = 1;
-    }
-    if (bot.ballDirection() > 0) {
-        currentBallRotation = -45;
-        ballDirection = -1;
-    }
-    if (bot.ballDirection() < 0) {
-        currentBallRotation = 45;
-        ballDirection = 1;
-    }
+        if (kickOff) {
+            if (bot.boardButton(2)){
+                bot.drive(-1, 90, 0);
+                bot.sleep(400);
+                kickOff = false;
+            }
+            if (bot.boardButton(3)) {
+                bot.drive(1, 90, 0);
+                bot.sleep(400);
+                kickOff = false;
+            }
+        }
 
-    if (mode.currentMode == 1) {
         if (bot.seesBall()) {
             if (bot.goalAligned()) {
                 if (bot.ballDirection() > 4 || bot.ballDirection() < -4) {
-                    bot.drive(4, 75, 0);
+                    bot.drive(4, 85, 0);
                     bot.boardLED(2, BLUE);
                 }
                 if (bot.ballDirection() > -4 && bot.ballDirection() < 0) {
                     bot.drive(-2, 0, 0);
-                    bot.boardLED(2, GREEN);
+                    bot.boardLED(1, GREEN);
                 }
                 if (bot.ballDirection() > 0 && bot.ballDirection() < 4) {
                     bot.drive(2, 0, 0);
-                    bot.boardLED(2, GREEN);
+                    bot.boardLED(1, GREEN);
                 }
 
                 if (bot.goalDirection() < 0) {
@@ -106,7 +86,6 @@ void loop() {
                 bot.boardLED(1, GREEN);
             }
             if (!bot.goalAligned()) {
-
                 if (bot.goalLeft() && bot.ballDirection() == 0) {
                     bot.drive(0, 80, 0);
                 }
@@ -118,30 +97,17 @@ void loop() {
                 bot.drive(0, 0, currentGoalRotation);
                 bot.boardLED(2, RED);
             }
-        } else bot.drive(0, 0, 0);
 
-        if (cornerTimer >= 1500) {
-            bot.boardLED(2, WHITE);
+            if (bot.ballDirection() != ballCache) {
+                cornerTimer = 0;
+            }
 
-            if (bot.ballDirection() == 0) {
-                bot.drive(0, 0, currentGoalRotation);
-            }
-            if (bot.ballDirection() != 0) {
-                if (ballDirection == 1) {
-                    if (bot.ballDirection() != -1) {
-                        bot.drive(0, 0, currentBallRotation);
-                    }
-                }
-                if (ballDirection == -1) {
-                    if (bot.ballDirection() != 1) {
-                        bot.drive(0, 0, currentBallRotation);
-                    }
-                }
-            }
+            ballCache = bot.ballDirection();
         }
+
+        else bot.drive(0, 0, 0);
     }
     else {
 
     }
-
 }

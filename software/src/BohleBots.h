@@ -351,6 +351,8 @@ public:
 
     bool goalRight();
 
+    bool isInCorner(int ms, int ballCache, int cornerDirection);
+
     float x;
     float y;
     float z;
@@ -375,6 +377,7 @@ private:
     int _ballDirection;
     int _ballDistance;
     bool _seesBall;
+    bool _isInCorner;
 
     int speedToPWm(int speed);
 

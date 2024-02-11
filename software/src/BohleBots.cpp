@@ -415,6 +415,17 @@ int BohleBots::speedToPWm(int speed) {
     return ((speed * 255) / 100);
 }
 
+bool BohleBots::isInCorner(int ms, int ballCache, int cornerDirection) {
+    if (cornerDirection >= 95 && cornerDirection <= 105) {
+        if (_ballDirection == ballCache && ms > 1200 && cornerDirection) return true;
+    }
+    if (cornerDirection >= -165 && cornerDirection <= -175) {
+        if (_ballDirection == ballCache && ms > 1200) return true;
+    }
+    if (_ballDirection == ballCache && ms > 2000) return true;
+    else return false;
+}
+
 int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
 
     uint8_t addresses[] = {COMPASS_LINEAR_ACCELERATION_X_HIGH, COMPASS_LINEAR_ACCELERATION_Y_HIGH,
@@ -427,6 +438,9 @@ int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
 
     static float velocity[] = {0.0, 0.0, 0.0};
     static float position[] = {0.0, 0.0, 0.0};
+
+    float dt = 0.016;  // Assuming a constant time step, adjust if needed
+    float tolerance = 0.1;  // Adjust this value based on your requirements
 
     static unsigned long previousMillis = 0;
     unsigned long currentMillis = millis();
@@ -456,15 +470,20 @@ int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
         float nextPosition = position[i] + velocity[i] * dt_actual;
 
         // Apply a simple low-pass filter to reduce noise
-        position[i] = 0.9 * position[i] + 0.1 * nextPosition;
+        position[i] = 0.95 * position[i] + 0.05 * nextPosition;
 
         // Check if the acceleration is close to zero, indicating rest
-        if (abs(data[i]) < 20) {
+        if (abs(data[i]) < 10) {
             // If the acceleration is close to zero, reset the velocity and position
             velocity[i] = 0.0;
             position[i] = position[i];
         }
     }
+
+    // Adjust the scaling factor for position to increase visibility
+    x = position[0] * 0.1;  // Experiment with different scaling factors
+    y = position[1] * 0.1;
+    z = position[2] * 0.1;
 
     acceleration.x = data[0];
     acceleration.y = data[1];
@@ -473,14 +492,6 @@ int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
     acceleration.x = convertToLinearAcceleration(data[0]);
     acceleration.y = convertToLinearAcceleration(data[1]);
     acceleration.z = convertToLinearAcceleration(data[2]);
-
-    x = position[0];
-    y = position[1];
-    z = position[2];
-
-    x = x / 10;
-    y = y / 10;
-    z = z / 10;
 
     return 0;
 }
