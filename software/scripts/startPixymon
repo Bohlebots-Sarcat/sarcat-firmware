@@ -1,0 +1,5 @@
+#bin/zsh
+
+cd /Applications/Pixymon.app/Contents/MacOS
+pwd
+./pixymon
