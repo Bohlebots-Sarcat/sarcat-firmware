@@ -48,6 +48,12 @@
 #define dribbler 2
 #define IR_ADDRESS 0x55
 #define COMPASS_ADDRESS 0x60 // cmps11, cmps12, cmps14
+
+#define ULTRASONIC_1 0x72
+#define ULTRASONIC_2 0x73
+#define ULTRASONIC_3 0x74
+#define ULTRASONIC_4 0x75
+
 #define ANGLE_8 1
 
 // COMPASS COMMANDS
@@ -254,7 +260,7 @@ public:
     void boardLED(int LED, int color);
 
 
-    // +++++++++++++++++ Pixy and compass +++++++++++++++++++ //
+    // ++++++++++++ Pixy compass and Ultra sonic +++++++++++++ //
 
     /***********************************************************
      *
@@ -323,8 +329,17 @@ public:
      **********************************************************/
     int compass();
 
-    // +++++++++++++ Motors, driving and kicking +++++++++++++ //
+    /************************************************************
+     *
+     *  BohleBots::calibrateUltrasonic()
+     *
+     *  Description:
+     *      Calibrates the ultrasonic sensor.
+     *
+     ***********************************************************/
+    void calibrateUltrasonic();
 
+    // +++++++++++++ Motors, driving and kicking +++++++++++++ //
     void motor(int number, int speed);
 
     void drive(int direction, int speed, int rotation);
@@ -335,7 +350,11 @@ public:
 
     // ++++++++++++ Return's of private Variables ++++++++++++ //
 
+    int getUltrasonic(int sensor);
+
     int ballDirection();
+
+    bool hasBall();
 
     bool seesBall();
 
@@ -364,6 +383,7 @@ private:
     // elapsedMillis
     elapsedMillis coolDown;
     elapsedMillis sleepDuration;
+    elaspesMillis UltraSonicCoolDown;
     // Ports and Addresses
     int _tastLedID[8] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
     bool _portena[8] = {false, false, false, false, false, false, false, false};
@@ -371,6 +391,7 @@ private:
     bool _taster2Array[8] = {false, false, false, false, false, false, false, false};
     int _led1Array[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     int _led2Array[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    int _ultraSonicData[4] = {0, 0, 0, 0};
     // Bot
     int _botType;
     int _irData;

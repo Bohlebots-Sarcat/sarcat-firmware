@@ -147,6 +147,13 @@ void BohleBots::i2csync() {
         _compassData = readCompass();
     }
     readPixy();
+
+    if (UltraSonicCoolDown >= 70) {
+        UltraSonicCoolDown = 0;
+        for (int i = 0; i < 4; i++) {
+            _ultraSonicData[i] = getUltrasonic(i);
+        }
+    }
 }
 
 int BohleBots::input(int nr) {
@@ -302,8 +309,8 @@ void BohleBots::motor(int number, int speed) {
         ledcWrite(number, pwm);
 }
 
-void BohleBots::drive(int direction, int speed, int rotation) {
-    drive3(direction, speed, rotation);
+void BohleBots:: drive(int direction, int speed, int rotation) {
+    drive3 (direction, speed, rotation);
 }
 
 void BohleBots::drive2(int speed, int rotation) {
@@ -334,9 +341,9 @@ void BohleBots::drive3(int direction, int speed, int rotation) {
             motor(3, +rotation);
             break;
         case 2:
-            motor(1, -48);
-            motor(2, 80);
-            motor(3, -48);
+            motor(1, -speed / 2);
+            motor(2, speed);
+            motor(3, -speed / 2);
             break;
         case 3:
             motor(1, +rotation);
@@ -354,9 +361,9 @@ void BohleBots::drive3(int direction, int speed, int rotation) {
             motor(3, +rotation);
             break;
         case -2:
-            motor(1, 48);
-            motor(2, -80);
-            motor(3, 48);
+            motor(1,  speed / 2);
+            motor(2, -speed);
+            motor(3, speed / 2);
             break;
         case -1:
             motor(1, +rotation);
@@ -376,6 +383,11 @@ int BohleBots::ballDirection() {
     return _ballDirection;
 }
 
+bool BohleBots::hasBall() {
+    if (input(4) == 4095) return true;
+    else return false;
+}
+
 bool BohleBots::seesBall() {
     return _seesBall;
 }
@@ -393,8 +405,8 @@ bool BohleBots::seesGoal() {
 }
 
 bool BohleBots::goalAligned() {
-    if (abs(_goalDirection) < 23) return true;
-    if (abs(_goalDirection) > 23) return false;
+    if (abs(_goalDirection) < 30) return true;
+    if (abs(_goalDirection) > 30) return false;
 }
 
 bool BohleBots::goalLeft() {
