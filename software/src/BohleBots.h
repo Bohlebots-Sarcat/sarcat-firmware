@@ -49,14 +49,10 @@
 #define IR_ADDRESS 0x55
 #define COMPASS_ADDRESS 0x60 // cmps11, cmps12, cmps14
 
-#define ULTRASONIC_1 0x72
-#define ULTRASONIC_2 0x73
-#define ULTRASONIC_3 0x74
-#define ULTRASONIC_4 0x75
-
 #define ANGLE_8 1
 
 // COMPASS COMMANDS
+
 const uint8_t COMPASS_LINEAR_ACCELERATION_X_HIGH = 0x0C;
 const uint8_t COMPASS_LINEAR_ACCELERATION_Y_HIGH = 0x0E;
 const uint8_t COMPASS_LINEAR_ACCELERATION_Z_HIGH = 0x10;
@@ -77,6 +73,29 @@ struct Acceleration {
     int y;
     int z;
 };
+
+namespace ultraSonic {
+    elapsedMillis rangingCooldown;
+    bool rangingComplete;
+    int addresses[4] = {0x70, 0x72, 0x77, 0x78};
+    uint16_t data[4] = {0, 0, 0, 0};
+}
+
+namespace pixy {
+    Pixy2I2C pixy;
+    bool seesGoal;
+    int goalDirection;
+    int goalWidth;
+    int goalHeight;
+    int rawDistance;
+    int goalDistance;
+}
+
+namespace compass {
+    int data;
+    int heading;
+    int ena;
+}
 
 class BohleBots {
 public:
@@ -331,13 +350,24 @@ public:
 
     /************************************************************
      *
-     *  BohleBots::calibrateUltrasonic()
+     *  BohleBots::writeUS()
      *
      *  Description:
-     *      Calibrates the ultrasonic sensor.
+     *      Writes on to register 0x00 and 0x51 to get the
+     *      ranging result in centimeters.
      *
      ***********************************************************/
-    void calibrateUltrasonic();
+    void writeUS();
+
+    /************************************************************
+     *  BohleBots::readUS()
+     *
+     *  Description:
+     *      Reads the high and low byte of the sensors
+     *      and combines them for the result.
+     *
+     ***********************************************************/
+    void readUS();
 
     // +++++++++++++ Motors, driving and kicking +++++++++++++ //
     void motor(int number, int speed);
@@ -383,7 +413,7 @@ private:
     // elapsedMillis
     elapsedMillis coolDown;
     elapsedMillis sleepDuration;
-    elaspesMillis UltraSonicCoolDown;
+    elapsedMillis rangingCoolDown;
     // Ports and Addresses
     int _tastLedID[8] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
     bool _portena[8] = {false, false, false, false, false, false, false, false};
@@ -391,7 +421,6 @@ private:
     bool _taster2Array[8] = {false, false, false, false, false, false, false, false};
     int _led1Array[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     int _led2Array[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    int _ultraSonicData[4] = {0, 0, 0, 0};
     // Bot
     int _botType;
     int _irData;
@@ -408,17 +437,6 @@ private:
 
     // Pixy
     Pixy2I2C pixy;
-    bool _hasPixy;
-    bool _seesGoal;
-    int _goalDirection;
-    int _goalWidth;
-    int _goalHeight;
-    int _rawDistance;
-    int _goalDistance;
-    // Compass
-    int _compassData;
-    int _compassHeading;
-    int _compassEna;
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
