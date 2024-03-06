@@ -71,13 +71,15 @@ void BohleBots::init() {
 
     Wire.beginTransmission(COMPASS_ADDRESS);
     byte error = Wire.endTransmission();
-    if (error == 0) _compassEna = true;
+    if (error == 0) compass::ena = true;
     if (error == 0) Serial.println("Kompass true");
     else Serial.println("Kompass false");
 
     Serial.print("Warte auf Pixy2 auf i2c 0x54...");
     pixy.init(0x54);
     Serial.println("done");
+
+    ultraSonic::rangingComplete = true;
 
 }
 
@@ -143,17 +145,18 @@ void BohleBots::i2csync() {
     if (!_seesBall)
         _ballDirection = 0;
 
-    if (_compassEna == true) {
-        _compassData = readCompass();
+    if (compass::ena == true) {
+        compass::data = readCompass();
     }
     readPixy();
 
-    if (UltraSonicCoolDown >= 70) {
-        UltraSonicCoolDown = 0;
-        for (int i = 0; i < 4; i++) {
-            _ultraSonicData[i] = getUltrasonic(i);
-        }
+    if (ultraSonic::rangingComplete) writeUS();
+    if (ultraSonic::rangingCooldown >= 100) {
+        ultraSonic::rangingCooldown = 0;
+        ultraSonic::rangingComplete = true;
+        readUS();
     }
+
 }
 
 int BohleBots::input(int nr) {
@@ -229,10 +232,10 @@ void BohleBots::boardLED(int LED, int color) {
 
 void BohleBots::readPixy() {
     pixy.ccc.getBlocks();
-    _seesGoal = false;
+    pixy::seesGoal = false;
     if (pixy.ccc.numBlocks) {
         evaluatePixy(1);
-        _seesGoal = true;
+        pixy::seesGoal = true;
     }
 }
 
@@ -241,11 +244,11 @@ void BohleBots::evaluatePixy(int signature) {
 
     if (signature == 1) {
         if (sieht_farbe == 1) {
-            _goalDirection = (pixy.ccc.blocks[0].m_x - 158) / 2;
-            _goalWidth = pixy.ccc.blocks[0].m_width;
-            _goalHeight = pixy.ccc.blocks[0].m_height;
-            _rawDistance = pixy.ccc.blocks[0].m_y;
-            _goalDistance = (_rawDistance - _goalHeight) / 4;
+            pixy::goalDirection = (pixy.ccc.blocks[0].m_x - 158) / 2;
+            pixy::goalWidth = pixy.ccc.blocks[0].m_width;
+            pixy::goalHeight = pixy.ccc.blocks[0].m_height;
+            pixy::rawDistance = pixy.ccc.blocks[0].m_y;
+            pixy::goalDistance = (pixy::rawDistance - pixy::goalHeight) / 4;
         }
     }
 }
@@ -254,7 +257,7 @@ void BohleBots::compassHeading() {
     Wire.beginTransmission(COMPASS_ADDRESS);
     byte error = Wire.endTransmission();
     if (error == 0) {
-        _compassHeading = compassOrg();
+        compass::heading = compassOrg();
     }
 }
 
@@ -276,11 +279,29 @@ int BohleBots::compassOrg() {
 }
 
 int BohleBots::readCompass() {
-    return ((((compassOrg() - _compassHeading) + 180 + 360) % 360) - 180);
+    return ((((compassOrg() - compass::heading) + 180 + 360) % 360) - 180);
 }
 
 int BohleBots::compass() {
-    return _compassData;
+    return compass::data;
+}
+
+void BohleBots::writeUS() {
+    for (int i : ultraSonic::addresses) {
+        Wire.beginTransmission(i);
+        Wire.write(0x00);
+        Wire.write(0x51);
+        Wire.endTransmission();
+    }
+}
+
+void BohleBots::readUS() {
+    for (int i : ultraSonic::addresses) {
+        Wire.requestFrom(ultraSonic::addresses[i], 2);
+        uint8_t highByte = Wire.read();
+        uint8_t lowByte = Wire.read();
+        ultraSonic::data[i] = (highByte << 8) + lowByte;
+    }
 }
 
 void BohleBots::motor(int number, int speed) {
@@ -393,31 +414,31 @@ bool BohleBots::seesBall() {
 }
 
 int BohleBots::goalDirection() {
-    return _goalDirection;
+    return pixy::goalDirection;
 }
 
 int BohleBots::goalDistance() {
-    return _goalDistance;
+    return pixy::goalDistance;
 }
 
 bool BohleBots::seesGoal() {
-    return _seesGoal;
+    return pixy::seesGoal;
 }
 
 bool BohleBots::goalAligned() {
-    if (abs(_goalDirection) < 30) return true;
-    if (abs(_goalDirection) > 30) return false;
+    if (abs(pixy::goalDirection) < 30) return true;
+    if (abs(pixy::goalDirection) > 30) return false;
 }
 
 bool BohleBots::goalLeft() {
-    if (_goalDirection > 45 && _goalDistance < -3) return true;
-    if (_goalDirection > 30 && _goalDistance > -3) return true;
+    if (pixy::goalDirection > 45 && pixy::goalDistance < -3) return true;
+    if (pixy::goalDirection > 30 && pixy::goalDistance > -3) return true;
     else return false;
 }
 
 bool BohleBots::goalRight() {
-    if (_goalDirection < -45 && _goalDistance < -3) return true;
-    if (_goalDirection < -30 && _goalDistance > -3) return true;
+    if (pixy::goalDirection < -45 && pixy::goalDistance < -3) return true;
+    if (pixy::goalDirection < -30 && pixy::goalDistance > -3) return true;
     else return false;
 }
 
