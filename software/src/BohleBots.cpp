@@ -110,26 +110,26 @@ void BohleBots::setType(int type) {
 }
 
 void BohleBots::i2csync() {
-    for (int lauf = 0; lauf < 8; lauf++) {
-        if (_portena[lauf]) {
-            int ledwert = 255 - _led1Array[lauf] - _led2Array[lauf];
-            Wire.beginTransmission(_tastLedID[lauf]);
+    for (int i = 0; i < 8; i++) {
+        if (_portena[i]) {
+            int ledwert = 255 - _led1Array[i] - _led2Array[i];
+            Wire.beginTransmission(_tastLedID[i]);
             Wire.write(ledwert);
             Wire.endTransmission();
 
-            Wire.requestFrom(_tastLedID[lauf], 1);
+            Wire.requestFrom(_tastLedID[i], 1);
             if (Wire.available()) {
                 int tread = 255 - Wire.read();
                 tread = tread % 128;
                 if (tread > 63)
-                    _taster2Array[lauf] = true;
+                    _taster2Array[i] = true;
                 else
-                    _taster2Array[lauf] = false;
+                    _taster2Array[i] = false;
                 tread = tread % 2;
                 if (tread > 0)
-                    _taster1Array[lauf] = true;
+                    _taster1Array[i] = true;
                 else
-                    _taster1Array[lauf] = false;
+                    _taster1Array[i] = false;
             }
         }
     } // ENDE TastLED
