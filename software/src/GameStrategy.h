@@ -14,6 +14,7 @@ elapsedMillis cornerTimer;
 enum DEBUG {
     BALL,
     GOAL,
+    EDGE,
     COMPASS,
     GYRO,
     CORNER,
@@ -28,6 +29,7 @@ public :
             case 1: {
                 switch (_currentMode) {
                     case 0:
+                        cornerTimer = 0;
                         _currentMode = 1;
                         break;
                     case 1:
@@ -97,8 +99,17 @@ public :
             case GOAL: {
                 Serial.printf("-- Goal --\n");
                 Serial.printf("Goal: %d\n", bot.goalDirection());
+                Serial.printf("Goal Height: %d\n", bot.goalDistance());
                 Serial.printf("Goal Aligned: %d\n", bot.goalAligned());
                 Serial.printf("-- Goal --\n");
+                break;
+            }
+            case EDGE: {
+                Serial.printf("-- Edge --\n");
+                Serial.printf("Edge: %d\n", edge);
+                Serial.printf("Ball Direction: %d\n", bot.ballDirection());
+                Serial.printf("Goal Direction: %d\n", bot.goalDirection());
+                Serial.printf("-- Edge --\n");
                 break;
             }
             case COMPASS: {
@@ -132,41 +143,61 @@ public :
 
 private:
     void play() {
-        if (_goalAligned) {
-            if (ballIsAhead()) {
-                if (ballIsRight()) {
-                    if (bot.ballDirection() != 1) {
-                        bot.drive(2, 70, 0);
-                    }
-                }
-                if (ballIsLeft()) {
-                    if (bot.ballDirection() != -1) {
-                        bot.drive(-2, 70, 0);
-                    }
-                }
-                if (abs(bot.ballDirection()) == 1) {
-                    bot.drive(0, 90, 0);
-                }
-            }
-            if (ballIsBehind() && !isInCorner) {
-                if (ballIsBack()) {
-                    if (_currentGoalRotation > 0) bot.drive(2, 80, 0);
-                    if (_currentGoalRotation < 0) bot.drive(-2, 80, 0);
-                }
-                if (!ballIsBack()) {
-                    bot.drive(4, 100, 0);
-                }
-            }
+        if (isInCorner) {
+            escapeCorner();
         }
-        if (!_goalAligned) {
-            if (!bot.seesGoal()) {
-                bot.drive(0, 0, _currentBallRotation);
+        if (!isInCorner) {
+            if (bot.seesGoal() || absoluteAligned()) {
+                if (ballIsAhead()) {
+                    if (!striker) {
+                        if (edge) {
+                            bot.drive(0, 60, 0);
+                        }
+                        if (!edge) {
+                            if (ballIsLeft()) bot.drive(-2, 60, 0);
+                            if (ballIsRight()) bot.drive(2, 60, 0);
+                        }
+                        if (bot.ballDirection() == 0) striker = true;
+                    }
+
+                    if (striker) {
+                        if (bot.goalAligned()) {
+                            if (abs(bot.ballDirection()) <= 1) {
+                                bot.drive(0, 80, -bot.goalDirection() / 3);
+                            }
+                        }
+
+                        if (abs(bot.ballDirection()) >= 2 || abs(bot.goalDirection()) > 30) {
+                            striker = false;
+                        }
+                    }
+                }
+                if (ballIsBehind()) {
+                    bot.drive(5, 70, compasRotation());
+                }
+            }
+            if (!bot.seesGoal() && !absoluteAligned()) {
+                bot.drive(0, 0, compasRotation());
             }
         }
         updateSensors();
     }
     void updateSensors() {
+        if (abs(bot.goalDirection()) < 40 || ballIsBehind() || !bot.seesGoal()) edge = false;
+
+        if (cornerTimer > 1250 && !absoluteAligned() && bot.goalDirection() < 60 && !bot.hasBall()) isInCorner = true;
+
         if (bot.goalAligned() && cornerTimer < 2000) isInCorner = false;
+
+        if (!bot.seesGoal() && bot.hasBall()) isInCorner = true;
+
+        if (cornerTimer > 2000) isInCorner = true;
+
+        if (abs(bot.goalDirection()) > 40 && abs(bot.ballDirection()) <= 1) edge = true;
+
+        if (bot.ballDirection() != _ballCache) {
+            cornerTimer = 0;
+        }
 
         if (bot.goalAligned()) {
             _goalAligned = true;
@@ -176,10 +207,10 @@ private:
         }
 
         if (bot.goalDirection() > 0) {
-            _currentGoalRotation = -25;
+            _currentGoalRotation = -40;
         }
         else {
-            _currentGoalRotation = 25;
+            _currentGoalRotation = 40;
         }
 
         if (bot.ballDirection() > 0) {
@@ -195,8 +226,7 @@ private:
 
     void escapeCorner() {
         updateSensors();
-        if (abs(bot.ballDirection()) == 1 || bot.ballDirection() == 0)
-        {
+        if (abs(bot.ballDirection()) == 1 || bot.ballDirection() == 0) {
             if (!bot.hasBall()) bot.drive(0, 40, 0);
             if (bot.hasBall()) {
                 if (!bot.seesGoal()) {
@@ -213,6 +243,7 @@ private:
     }
 
     void function() {
+        bot.drive(0, 0, bot.compass() / 4);
     }
 
     void statusLED() {
@@ -228,6 +259,38 @@ private:
         if (isInCorner) bot.boardLED(2, WHITE);
     }
 
+    bool absoluteAligned() {
+        if (abs(bot.compass()) < 15) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    int compasRotation() {
+        if (abs(bot.compass()) < 10) {
+            return 0;
+        }
+
+        if (abs(bot.compass()) > 60) {
+            if (bot.compass() > 0) {
+                return 30;
+            }
+            else {
+                return -30;
+            }
+        }
+        if (abs(bot.compass()) < 30) {
+            if (bot.compass() > 0) {
+                return 15;
+            }
+            else {
+                return -15;
+            }
+        }
+    }
+
     bool ballIsAhead() {
         return (bot.ballDirection() > -4 && bot.ballDirection() < 4);
     }
@@ -241,16 +304,18 @@ private:
     }
 
     bool ballIsLeft() {
-        return (bot.ballDirection() > -3 && bot.ballDirection() < 0);
+        return (bot.ballDirection() > -7 && bot.ballDirection() <= -1);
     }
 
     bool ballIsRight() {
-        return (bot.ballDirection() > 0 && bot.ballDirection() < 3);
+        return (bot.ballDirection() >= 1 && bot.ballDirection() < 7);
     }
 
     int _currentMode;
 
     bool _goalAligned;
+    bool edge;
+    bool striker;
 
     int _currentGoalRotation;
     int _currentBallRotation;

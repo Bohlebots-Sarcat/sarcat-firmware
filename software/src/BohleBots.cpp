@@ -75,6 +75,10 @@ void BohleBots::init() {
     if (error == 0) Serial.println("Kompass true");
     else Serial.println("Kompass false");
 
+    i2csync();
+    delay(1);
+    _startCompass = readCompass() + 180;
+
     Serial.print("Warte auf Pixy2 auf i2c 0x54...");
     pixy.init(0x54);
     Serial.println("done");
@@ -130,7 +134,7 @@ void BohleBots::i2csync() {
                     _taster1Array[lauf] = false;
             }
         }
-    } // ENDE TastLED
+    }
     _irData = 0;
     Wire.requestFrom(IR_ADDRESS, 1);
     if (Wire.available()) {
@@ -147,13 +151,6 @@ void BohleBots::i2csync() {
         _compassData = readCompass();
     }
     readPixy();
-
-    if (UltraSonicCoolDown >= 70) {
-        UltraSonicCoolDown = 0;
-        for (int i = 0; i < 4; i++) {
-            _ultraSonicData[i] = getUltrasonic(i);
-        }
-    }
 }
 
 int BohleBots::input(int nr) {
@@ -280,7 +277,29 @@ int BohleBots::readCompass() {
 }
 
 int BohleBots::compass() {
-    return _compassData;
+    int _compass = _compassData + 180;
+
+    int diffrence = _compass - _startCompass;
+
+    if (_compass - _startCompass < 0) {
+        _compass = 360 + diffrence;
+    }
+    else if (_compass - _startCompass > 0) {
+        _compass = diffrence;
+    }
+    else if (_compass - _startCompass == 0) {
+        _compass = 0;
+    }
+
+    if (_compass > 180) {
+        _compass = -(_compass - 180);
+    }
+    if (_compass < 0) {
+        _compass = _compass + 180;
+        _compass = -_compass;
+    }
+
+    return _compass;
 }
 
 void BohleBots::motor(int number, int speed) {
@@ -341,9 +360,9 @@ void BohleBots::drive3(int direction, int speed, int rotation) {
             motor(3, +rotation);
             break;
         case 2:
-            motor(1, -speed / 2);
-            motor(2, speed);
-            motor(3, -speed / 2);
+            motor(1, (-speed / 2) + rotation);
+            motor(2, speed + rotation);
+            motor(3, (-speed / 2) + rotation);
             break;
         case 3:
             motor(1, +rotation);
@@ -351,9 +370,19 @@ void BohleBots::drive3(int direction, int speed, int rotation) {
             motor(3, -speed + rotation);
             break;
         case 4:
+            motor(1, speed / 2);
+            motor(2, speed / 2);
+            motor(3, -speed);
+            break;
+        case 5:
             motor(1, speed + rotation);
             motor(2, +rotation);
             motor(3, -speed + rotation);
+            break;
+        case -4:
+            motor(1, speed + rotation);
+            motor(2, (-speed / 2) + rotation);
+            motor(3, -speed / 2);
             break;
         case -3:
             motor(1, speed + rotation);
@@ -400,13 +429,18 @@ int BohleBots::goalDistance() {
     return _goalDistance;
 }
 
+int BohleBots::goalHeight() {
+    return _goalHeight;
+
+}
+
 bool BohleBots::seesGoal() {
     return _seesGoal;
 }
 
 bool BohleBots::goalAligned() {
-    if (abs(_goalDirection) < 30) return true;
-    if (abs(_goalDirection) > 30) return false;
+    if (abs(_goalDirection) < 20) return true;
+    if (abs(_goalDirection) > 20) return false;
 }
 
 bool BohleBots::goalLeft() {

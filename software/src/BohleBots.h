@@ -362,6 +362,8 @@ public:
 
     int goalDistance();
 
+    int goalHeight();
+
     bool seesGoal();
 
     bool goalAligned();
@@ -383,7 +385,6 @@ private:
     // elapsedMillis
     elapsedMillis coolDown;
     elapsedMillis sleepDuration;
-    elaspesMillis UltraSonicCoolDown;
     // Ports and Addresses
     int _tastLedID[8] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
     bool _portena[8] = {false, false, false, false, false, false, false, false};
@@ -416,6 +417,7 @@ private:
     int _rawDistance;
     int _goalDistance;
     // Compass
+    int _startCompass;
     int _compassData;
     int _compassHeading;
     int _compassEna;

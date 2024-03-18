@@ -23,5 +23,6 @@ void loop() {
     }
 
     mode.run();
-    mode.debug(BALL);
+    mode.debug(GOAL);
+    bot.sleep(5);
 }
