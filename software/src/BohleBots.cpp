@@ -4,6 +4,8 @@
 
 #include "BohleBots.h"
 
+espOTA ota("Bohlebots", "soccer2018");
+
 BohleBots::BohleBots() {
     Serial.begin(115200);
     Wire.begin(SDA, SCL);
@@ -58,17 +60,6 @@ BohleBots::BohleBots() {
 }
 
 void BohleBots::init() {
-    for (int i = 0; i < 8; i++) {
-        Wire.beginTransmission(_tastLedID[i]);
-        byte error = Wire.endTransmission();
-        if (error == 0) _portena[i] = true;
-        Serial.print("LED_Tast : " + String(i) + " : ");
-        if (error == 0) Serial.println("true");
-        else Serial.println("false");
-    }
-
-    delay(100);
-
     Wire.beginTransmission(COMPASS_ADDRESS);
     byte error = Wire.endTransmission();
     if (error == 0) _compassEna = true;
@@ -83,11 +74,13 @@ void BohleBots::init() {
     pixy.init(0x54);
     Serial.println("done");
 
+    ota.begin();
 }
 
 void BohleBots::sleep(int ms) {
     sleepDuration = 0;
     i2csync();
+    ota.handle();
     while (sleepDuration < ms) {
         if ((sleepDuration % 10) == 0)
             i2csync();
@@ -154,14 +147,13 @@ void BohleBots::i2csync() {
 }
 
 int BohleBots::input(int nr) {
-    if (nr == 1)
-        return (analogRead(INPUT1));
-    if (nr == 2)
-        return (analogRead(INPUT2));
-    if (nr == 3)
-        return (analogRead(INPUT3));
-    if (nr == 4)
-        return (analogRead(INPUT4));
+    switch (nr) {
+        case 1: return analogRead(INPUT1);
+        case 2: return analogRead(INPUT2);
+        case 3: return analogRead(INPUT3);
+        case 4: return analogRead(INPUT4);
+        default: return -1;
+    }
 }
 
 bool BohleBots::button(int device, int button) {
@@ -206,20 +198,21 @@ void BohleBots::LED(int device, int LED, int color) {
 
 void BohleBots::boardLED(int LED, int color) {
     {
-        if (color < 0)
-            return;
-        if (color > 7)
-            return;
+        if (color < 0) return;
+        if (color > 7) return;
 
-        if (LED == 1) {
-            digitalWrite(led1g, !(color & 1));
-            digitalWrite(led1r, !(color & 2));
-            digitalWrite(led1b, !(color & 4));
-        }
-        if (LED == 2) {
-            digitalWrite(led2g, !(color & 1));
-            digitalWrite(led2r, !(color & 2));
-            digitalWrite(led2b, !(color & 4));
+        switch (LED) {
+            case 1: {
+                digitalWrite(led1g, !(color & 1));
+                digitalWrite(led1r, !(color & 2));
+                digitalWrite(led1b, !(color & 4));
+            }
+            case 2: {
+                digitalWrite(led2g, !(color & 1));
+                digitalWrite(led2r, !(color & 2));
+                digitalWrite(led2b, !(color & 4));
+            }
+            default: return;
         }
     }
 }
@@ -247,23 +240,15 @@ void BohleBots::evaluatePixy(int signature) {
     }
 }
 
-void BohleBots::compassHeading() {
-    Wire.beginTransmission(COMPASS_ADDRESS);
-    byte error = Wire.endTransmission();
-    if (error == 0) {
-        _compassHeading = compassOrg();
-    }
-}
-
 int BohleBots::compassOrg() {
-    unsigned char high_byte, low_byte, angle8;
+    unsigned char high_byte, low_byte;
     unsigned int angle16;
     Wire.beginTransmission(COMPASS_ADDRESS);
     Wire.write(ANGLE_8);
     Wire.endTransmission();
     Wire.requestFrom(COMPASS_ADDRESS, 3);
     while (Wire.available() < 3);
-    angle8 = Wire.read(); // Read back the 5 bytes
+    Wire.read(); // Read back the 5 bytes
     high_byte = Wire.read();
     low_byte = Wire.read();
     angle16 = high_byte; // Calculate 16 bit angle
@@ -314,6 +299,27 @@ void BohleBots::motor(int number, int speed) {
         dir = LOW;
     else
         dir = HIGH;
+
+    switch (number) {
+        case 1: {
+            digitalWrite(DRIVE1_DIR, dir);
+            break;
+        }
+        case 2: {
+            digitalWrite(DRIVE2_DIR, dir);
+            break;
+        }
+        case 3: {
+            digitalWrite(DRIVE3_DIR, dir);
+            break;
+        }
+        case 4: {
+            digitalWrite(DRIVE4_DIR, dir);
+            break;
+        }
+        default:
+            return;
+    }
 
     if (number == 1)
         digitalWrite(DRIVE1_DIR, dir);
@@ -439,7 +445,7 @@ bool BohleBots::seesGoal() {
 }
 
 bool BohleBots::goalAligned() {
-    if (abs(_goalDirection) < 20) return true;
+    if (abs(_goalDirection) < 20 && _goalDirection != 0) return true;
     if (abs(_goalDirection) > 20) return false;
 }
 
@@ -473,7 +479,6 @@ bool BohleBots::isInCorner(int ms, int ballCache, int cornerDirection) {
 }
 
 int BohleBots::readLinearAcceleration(Acceleration &acceleration) {
-
     uint8_t addresses[] = {COMPASS_LINEAR_ACCELERATION_X_HIGH, COMPASS_LINEAR_ACCELERATION_Y_HIGH,
                            COMPASS_LINEAR_ACCELERATION_Z_HIGH};
     int data[] = {0, 0, 0};

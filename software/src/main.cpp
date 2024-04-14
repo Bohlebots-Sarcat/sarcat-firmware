@@ -1,11 +1,11 @@
-#include <GameStrategy.h>
+#include "GameStrategy.h"
 
 GameStrategy mode;
 
 void setup() {
-    Serial.begin(115200);
     bot.init();
     bot.setType(3);
+    nc.begin();
 }
 
 void loop() {
@@ -18,11 +18,14 @@ void loop() {
         delay(200);
     }
     if (bot.boardButton(3)) {
-        mode.toggle(3);
-        delay(200);
+        bot.motor(4, -100);
+    }
+    if (!bot.boardButton(3)) {
+        bot.motor(4, 0);
     }
 
     mode.run();
-    mode.debug(GOAL);
+    mode.debug(BALL);
+    nc.handle();
     bot.sleep(5);
 }
