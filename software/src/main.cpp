@@ -23,5 +23,5 @@ void loop() {
     }
 
     mode.run();
-    mode.debug(BALL);
+    mode.debug(COMPASS);
 }
